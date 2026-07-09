@@ -1,438 +1,486 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI</title>
-    <style>
-body {
- font-family: system-ui, -apple-system, sans-serif;
- background-color: #000000; /* Negro puro para ahorrar batería AMOLED */
- color: #ffffff;
- margin: 0;
- display: block; /* Fuera flexbox global para mejorar el rendimiento del scroll */
- padding: 20px 8px 70px 8px; /* Margen para que no se corte en pantalla redonda */
- }
- .chat-container {
- width: 100%;
- display: block;
- box-shadow: none !important; /* Fuera sombras, causan lag de renderizado */
- border: none !important;
- }
- /* Cabecera adaptada a modo oscuro */
- .chat-header {
- background: #111111;
- padding: 10px 15px;
- border-bottom: 1px solid #222222;
- display: flex;
- justify-content: space-between;
- align-items: center;
- }
- .chat-header-title {
- font-weight: bold;
- color: #ffffff;
- font-size: 14px;
- }
- .model-badge {
- font-size: 11px;
- padding: 3px 8px;
- border-radius: 8px;
- font-weight: bold;
- }
- .chat-box {
- display: flex;
- flex-direction: column;
- gap: 10px;
- margin-bottom: 15px;
- }
- .message {
- max-width: 85%; /* Un poco más ancho para la micropantalla */
- padding: 10px 14px;
- font-size: 14px;
- line-height: 1.3;
- }
- .user-message {
- background-color: #0055ff; /* Azul vibrante pero oscuro */
- color: #ffffff;
- align-self: flex-end;
- border-radius: 12px 12px 2px 12px;
- }
- .ai-message {
- background-color: #1c1c1e; /* Gris oscuro de fondo para la IA */
- color: #ffffff;
- align-self: flex-start;
- border-radius: 12px 12px 12px 2px;
- }
- .system-message {
- background-color: #551111; /* Rojo oscuro de advertencia */
- color: #ff5555;
- align-self: center;
- border-radius: 6px;
- font-size: 12px;
- padding: 6px 10px;
- }
- .input-group {
- position: fixed; /* Se queda fijo abajo */
- bottom: 0;
- left: 0;
- right: 0;
- background: #000000;
- padding: 10px;
- border-top: 1px solid #222222;
- display: flex;
- gap: 8px;
- z-index: 100;
- }
- input[type="text"] {
- flex: 1;
- padding: 10px 12px;
- border: 1px solid #333333;
- background: #111111;
- color: #ffffff;
- border-radius: 20px;
- outline: none;
- font-size: 14px;
- }
- .send-btn {
- background-color: #0055ff;
- border: none;
- border-radius: 50%;
- width: 38px;
- height: 38px;
- display: flex;
- justify-content: center;
- align-items: center;
- }
- .send-btn svg {
- width: 16px;
- height: 16px;
- fill: white;
- transform: rotate(45deg);
- }
- 
- /* 🌐 ELIMINAMOS BORDER-RADIUS Y TRUCOS EMBED RAROS */
- body.embed-mode {
- background-color: #000000;
- }
- body.embed-mode .chat-container {
- width: 100vw !important;
- height: auto !important;
- max-width: 100% !important;
- }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>GW4 Gemini UI</title>
+  <style>
+    /* Estilos base optimizados para AMOLED (Negro Puro #000) */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      background-color: #000000;
+      color: #ffffff;
+      overflow-x: hidden;
+    }
+    
+    /* Contenedor principal */
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 24px 8px 60px 8px; /* Margen superior e inferior para pantallas redondas */
+    }
+    
+    /* Cabecera fija */
+    .chat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 12px;
+      background-color: #000000;
+      border-bottom: 1px solid #1a1a1a;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .chat-header-title {
+      cursor: pointer;
+      text-decoration: underline;
+      color: #00ffcc;
+      font-size: 13px;
+      font-weight: bold;
+    }
+    .model-badge {
+      font-size: 10px;
+      background: #1c1c1e;
+      padding: 2px 6px;
+      border-radius: 8px;
+      color: #aaaaaa;
+      border: 1px solid #333333;
+    }
+    
+    /* Zona de Mensajes */
+    .chat-box {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 12px 4px;
+    }
+    .message {
+      max-width: 90%;
+      padding: 8px 12px;
+      border-radius: 14px;
+      font-size: 13px;
+      line-height: 1.4;
+      word-wrap: break-word;
+    }
+    .user-message {
+      background-color: #1c1c1e;
+      color: #ffffff;
+      align-self: flex-end;
+      border-bottom-right-radius: 2px;
+    }
+    .ai-message {
+      background-color: #0a0a0a;
+      color: #e5e5e7;
+      align-self: flex-start;
+      border-bottom-left-radius: 2px;
+      border: 1px solid #1a1a1a;
+    }
+    .system-message {
+      max-width: 100%;
+      background: #1e1b4b; 
+      color: #a5b4fc; 
+      border: 1px solid #3730a3;
+      align-self: center;
+      text-align: center;
+      font-size: 11px;
+    }
 
- /* RENDERIZADO DE MARKDOWN EN MODO OSCURO */
- .ai-message p { margin: 0 0 6px 0; }
- .ai-message p:last-child { margin-bottom: 0; }
- .ai-message ul { margin: 4px 0; padding-left: 16px; list-style-type: disc; }
- .ai-message li { margin-bottom: 2px; }
- 
- .ai-message h1, .ai-message h2, .ai-message h3 {
- margin: 10px 0 4px 0;
- font-weight: bold;
- line-height: 1.2;
- color: #00ffcc; /* Títulos en verde neón ultra-legible */
- }
- .ai-message h1 { font-size: 1.2em; border-bottom: 1px solid #333333; padding-bottom: 2px; }
- .ai-message h2 { font-size: 1.1em; }
- .ai-message h3 { font-size: 1.05em; }
- .ai-message code { font-family: monospace; background-color: rgba(255,255,255,0.15); color: #ff5577; padding: 2px 4px; border-radius: 4px; font-size: 0.85em; }
- .ai-message .chat-link { color: #3b82f6; text-decoration: underline; }
- .code-block-container { margin: 8px 0; border-radius: 6px; overflow: hidden; border: 1px solid #333333; background-color: #111111; }
- .code-block-header { background-color: #222222; padding: 6px 10px; display: flex; justify-content: space-between; align-items: center; color: #aaaaaa; font-size: 11px; }
- .copy-code-btn { background: none; border: none; color: #888888; }
- .ai-message pre { margin: 0; padding: 8px; overflow-x: auto; }
- .ai-message pre code { background-color: transparent; color: #eeeeee; padding: 0; font-size: 0.8em; display: block; white-space: pre; }
-    </style>
+    /* Caja de entrada de texto inferior */
+    .input-group {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: #000000;
+      padding: 6px 8px;
+      display: flex;
+      gap: 6px;
+      border-top: 1px solid #1a1a1a;
+      z-index: 100;
+    }
+    .input-group input {
+      flex: 1;
+      background: #1c1c1e;
+      border: 1px solid #333333;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      outline: none;
+    }
+    .send-btn {
+      background: #00ffcc;
+      border: none;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .send-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: #000000;
+    }
+
+    /* MENÚ LATERAL DESPLEGABLE (100% PANTALLA) */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -100%;
+      width: 100vw;
+      height: 100vh;
+      background-color: #000000;
+      z-index: 200;
+      transition: left 0.2s cubic-bezier(0, 0, 0.2, 1);
+      padding: 28px 16px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+    }
+    .sidebar.open {
+      left: 0;
+    }
+    .menu-btn {
+      background: #1c1c1e;
+      color: #ffffff;
+      border: 1px solid #333333;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      text-align: left;
+      cursor: pointer;
+      word-wrap: break-word;
+      font-weight: 500;
+    }
+    .menu-btn-new {
+      background: #0055ff;
+      border: none;
+      text-align: center;
+      font-weight: bold;
+      color: white;
+    }
+    .close-menu-btn {
+      background: transparent;
+      border: none;
+      color: #ff5555;
+      text-align: center;
+      font-size: 13px;
+      margin-top: auto;
+      padding: 10px;
+    }
+
+    /* Reglas para elementos Markdown renderizados */
+    .ai-message strong { color: #ffffff; font-weight: bold; }
+    .ai-message em { font-style: italic; }
+    .ai-message code { background: #2c2c2e; padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 11px; color: #ff453a; }
+    .ai-message ul { margin-left: 16px; margin-top: 4px; margin-bottom: 4px; }
+    .ai-message li { margin-bottom: 2px; }
+    .ai-message h1, .ai-message h2, .ai-message h3 { font-size: 14px; margin-top: 6px; margin-bottom: 2px; color: #00ffcc; }
+    .ai-message blockquote { margin: 8px 0; padding-left: 10px; border-left: 3px solid #00ffcc; color: #aaaaaa; font-style: italic; }
+    .ai-message hr { border: 0; border-top: 1px solid #333333; margin: 12px 0; }
+  </style>
 </head>
 <body>
 
-<div class="chat-container">
+  <div id="sidebarMenu" class="sidebar">
+    <button class="menu-btn menu-btn-new" onclick="createNewChat()">➕ Nuevo Chat</button>
+    <div id="chatsList" style="display: flex; flex-direction: column; gap: 8px;"></div>
+    <button class="close-menu-btn" onclick="toggleMenu()">❌ Cerrar Menú</button>
+  </div>
+
+  <div class="chat-container">
     <div class="chat-header">
-        <span class="chat-header-title">AI Chat Game</span>
-        <span id="modelIndicator" class="model-badge">---</span>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span onclick="toggleMenu()" style="cursor: pointer; font-size: 18px; color: #00ffcc; padding-right: 4px;">☰</span>
+        <span class="chat-header-title" onclick="editSystemPrompt()">⚙️ IA</span>
+      </div>
+      <span id="modelIndicator" class="model-badge">⚡ Flash</span>
     </div>
-
-    <div class="chat-box" id="chatBox">
-        <div class="message ai-message">Hello! I am your assistant. How can I help you today?</div>
-    </div>
+    
+    <div class="chat-box" id="chatBox"></div>
+    
     <div class="input-group">
-        <input type="text" id="userInput" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
-        <button class="send-btn" onclick="sendMessage()">
-            <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-        </button>
+      <input type="text" id="userInput" placeholder="Escribe..." onkeypress="handleKeyPress(event)">
+      <button class="send-btn" onclick="sendMessage()">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
     </div>
-</div>
+  </div>
 
-<script>
-    // 🔍 COMPROBACIÓN INMEDIATA DEL MODO EMBED
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('embed')) {
-        document.body.classList.add('embed-mode');
-    }
+  <script>
+    // Configuración Inicial de la API
+    // REEMPLAZA EL CONTENIDO DE ESTA VARIABLE CON TU API KEY CODIFICADA EN BASE64
+    const BASE64_KEY = "QVEuQWI4Uk42SkxFdVpwRzdibHFDSFNPYWJFNGhEMmU0YzBxV2k2TV9iQThnUVhUTml3UVE=";
+    const API_KEY = atob(BASE64_KEY);
+    const currentModel = "gemini-2.5-flash";
 
-    const BASE64_KEYS = {
-        "gemini-2.5-flash": "QVEuQWI4Uk42SkxFdVpwRzdibHFDSFNPYWJFNGhEMmU0YzBxV2k2TV9iQThnUVhUTml3UVE=",
-        "gemini-2.5-flash-lite": "QVEuQWI4Uk42SmQ3cGV0STRuN2tBMDkycXA1V0dQWU1kbGV1bEFfZEVGSE54eHY3NzRxRXc="
-    };
-
-    let currentModel = "gemini-2.5-flash";
+    // Variables de Estado y Persistencia Multi-Chat
+    let currentSystemPrompt = "Eres un asistente personal ultra-directo, útil y conciso. Responde siempre en español. Usa párrafos muy extensos, profundiza en el tema, usa negritas y viñetas para que se lea bien en un reloj inteligente de 1.4 pulgadas. Proiridad de markdown: `#` y `##`, usa mas ** que cursiva o ambos. Proiridad: listas ordenadas.";
+    let chatsData = JSON.parse(localStorage.getItem("gw4_multichats")) || {};
+    let currentChatId = localStorage.getItem("gw4_current_chat_id") || null;
     let chatHistory = [];
 
-function updateModelIndicator() {
-    const indicator = document.getElementById("modelIndicator");
-    if (!indicator) return;
-
-    if (currentModel === "gemini-2.5-flash") {
-        indicator.innerText = "⚡ Flash";
-        indicator.style.backgroundColor = "#1e3a8a"; // Azul oscuro
-        indicator.style.color = "#93c5fd";           // Texto azul claro
-    } else {
-        indicator.innerText = "🪶 Lite";
-        indicator.style.backgroundColor = "#2d3748"; // Gris oscuro
-        indicator.style.color = "#e2e8f0";           // Texto gris claro
+    // Gestión del Menú de Historial
+    function toggleMenu() {
+      const menu = document.getElementById("sidebarMenu");
+      menu.classList.toggle("open");
+      if (menu.classList.contains("open")) {
+        renderChatsList();
+      }
     }
-}
 
-    function copyCode(btn) {
-        const container = btn.closest('.code-block-container');
-        if (!container) return;
-        const codeText = container.querySelector('pre code').innerText;
-        navigator.clipboard.writeText(codeText).then(() => {
-            const originalColor = btn.style.color;
-            btn.style.color = "#10b981";
-            setTimeout(() => { btn.style.color = originalColor; }, 1200);
+    function renderChatsList() {
+      const listContainer = document.getElementById("chatsList");
+      listContainer.innerHTML = "";
+      
+      Object.keys(chatsData).forEach(id => {
+        const chat = chatsData[id];
+        const btn = document.createElement("button");
+        btn.className = "menu-btn";
+        if (id === currentChatId) btn.style.borderColor = "#00ffcc";
+        btn.innerText = chat.title || "Chat vacío";
+        btn.onclick = () => loadChat(id);
+        listContainer.appendChild(btn);
+      });
+    }
+
+    function loadChat(id) {
+      currentChatId = id;
+      localStorage.setItem("gw4_current_chat_id", id);
+      chatHistory = chatsData[id].history || [];
+      
+      const chatBox = document.getElementById("chatBox");
+      chatBox.innerHTML = "";
+      
+      if (chatHistory.length === 0) {
+        chatBox.innerHTML = `<div class="message ai-message">¡Nuevo chat iniciado! ¿En qué te ayudo?</div>`;
+      } else {
+        chatHistory.forEach(msg => {
+          const roleClass = msg.role === "user" ? "user-message" : "ai-message";
+          const content = msg.role === "user" ? msg.parts[0].text : parseMarkdown(msg.parts[0].text);
+          chatBox.innerHTML += `<div class="message ${roleClass}">${content}</div>`;
         });
+      }
+      toggleMenu();
+      setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 50);
     }
 
-    function parseMarkdown(text) {
-        let lines = text.split('\n');
-        let inList = false;
-        let inCodeBlock = false;
-        let inTable = false;
-        let codeContent = [];
-        let codeLang = '';
-        let htmlResult = [];
-
-        for (let i = 0; i < lines.length; i++) {
-            let line = lines[i];
-            let cleanLine = line.trim();
-
-            if (inCodeBlock) {
-                if (cleanLine.startsWith('```')) {
-                    inCodeBlock = false;
-                    let escapedCode = codeContent.join('\n').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                    let displayLang = codeLang ? codeLang.toUpperCase() : 'CODE';
-                    htmlResult.push(`
-                        <div class="code-block-container">
-                            <div class="code-block-header">
-                                <span>${displayLang}</span>
-                                <button class="copy-code-btn" onclick="copyCode(this)" title="Copy Code">
-                                    <svg viewBox="0 0 24 24" width="16" height="16"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
-                                </button>
-                            </div>
-                            <pre><code class="language-${codeLang}">${escapedCode}</code></pre>
-                        </div>
-                    `);
-                    codeContent = [];
-                } else {
-                    codeContent.push(line);
-                }
-                continue;
-            }
-
-            if (cleanLine.startsWith('```')) {
-                inCodeBlock = true;
-                codeLang = cleanLine.substring(3).trim();
-                if (inList) { htmlResult.push('</ul>'); inList = false; }
-                if (inTable) { htmlResult.push('</tbody></table></div>'); inTable = false; }
-                continue;
-            }
-
-            if (cleanLine.startsWith('|')) {
-                if (inList) { htmlResult.push('</ul>'); inList = false; }
-                if (/^[|:\-\s]+$/.test(cleanLine)) continue;
-
-                let cells = line.split('|').map(c => c.trim());
-                if (cells[0] === '') cells.shift();
-                if (cells[cells.length - 1] === '') cells.pop();
-
-                if (!inTable) {
-                    inTable = true;
-                    htmlResult.push('<div class="table-container"><table><thead><tr>');
-                    cells.forEach(cell => { htmlResult.push(`<th>${formatInlineMarkdown(cell)}</th>`); });
-                    htmlResult.push('</tr></thead><tbody>');
-                } else {
-                    htmlResult.push('<tr>');
-                    cells.forEach(cell => { htmlResult.push(`<td>${formatInlineMarkdown(cell)}</td>`); });
-                    htmlResult.push('</tr>');
-                }
-                continue;
-            } else {
-                if (inTable) { htmlResult.push('</tbody></table></div>'); inTable = false; }
-            }
-
-            if (cleanLine.startsWith('###### ')) {
-                if (inList) { htmlResult.push('</ul>'); inList = false; }
-                htmlResult.push(`<h6>${formatInlineMarkdown(cleanLine.substring(7))}</h6>`);
-            } else if (cleanLine.startsWith('##### ')) {
-                if (inList) { htmlResult.push('</ul>'); inList = false; }
-                htmlResult.push(`<h5>${formatInlineMarkdown(cleanLine.substring(6))}</h5>`);
-            } else if (cleanLine.startsWith('#### ')) {
-                if (inList) { htmlResult.push('</ul>'); inList = false; }
-                htmlResult.push(`<h4>${formatInlineMarkdown(cleanLine.substring(5))}</h4>`);
-            } else if (cleanLine.startsWith('### ')) {
-                if (inList) { htmlResult.push('</ul>'); inList = false; }
-                htmlResult.push(`<h3>${formatInlineMarkdown(cleanLine.substring(4))}</h3>`);
-            } else if (cleanLine.startsWith('## ')) {
-                if (inList) { htmlResult.push('</ul>'); inList = false; }
-                htmlResult.push(`<h2>${formatInlineMarkdown(cleanLine.substring(3))}</h2>`);
-            } else if (cleanLine.startsWith('# ')) {
-                if (inList) { htmlResult.push('</ul>'); inList = false; }
-                htmlResult.push(`<h1>${formatInlineMarkdown(cleanLine.substring(2))}</h1>`);
-                } else if (cleanLine === '---' || cleanLine === '***') {
-    if (inList) { htmlResult.push('</ul>'); inList = false; }
-    if (inTable) { htmlResult.push('</tbody></table></div>'); inTable = false; }
-    htmlResult.push('<hr style="border:0;border-top:1px solid #333;margin:12px 0;">');
-
-// ─── 2. AÑADIR AQUÍ LAS CITAS EN BLOQUE (>) ───
-} else if (cleanLine.startsWith('> ')) {
-    if (inList) { htmlResult.push('</ul>'); inList = false; }
-    htmlResult.push(`<blockquote style="margin:8px 0;padding-left:10px;border-left:3px solid #00ffcc;color:#888;font-style:italic;">${formatInlineMarkdown(cleanLine.substring(2))}</blockquote>`);
-            } else if (cleanLine.startsWith('* ') || cleanLine.startsWith('- ')) {
-                if (!inList) { htmlResult.push('<ul>'); inList = true; }
-                htmlResult.push(`<li>${formatInlineMarkdown(cleanLine.substring(2))}</li>`);
-            } else {
-                if (inList) { htmlResult.push('</ul>'); inList = false; }
-                if (cleanLine !== '') htmlResult.push(`<p>${formatInlineMarkdown(cleanLine)}</p>`);
-            }
-        }
-
-        if (inList) htmlResult.push('</ul>');
-        if (inTable) htmlResult.push('</tbody></table></div>');
-        if (inCodeBlock) {
-            let escapedCode = codeContent.join('\n').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            htmlResult.push(`<div class="code-block-container"><pre><code>${escapedCode}</code></pre></div>`);
-        }
-        return htmlResult.join('');
+    function createNewChat() {
+      const newId = "chat_" + Date.now();
+      chatsData[newId] = { title: "Nuevo Chat 📝", history: [] };
+      saveToLocalStorage();
+      loadChat(newId);
     }
 
-function formatInlineMarkdown(text) {
- let formatted = text;
- // 1. Imágenes y Enlaces
- formatted = formatted.replace(/!\[(.*?)\]\((.*?)\)/g, '<img src="$2" alt="$1" class="chat-img">');
- formatted = formatted.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" class="chat-link">$1</a>');
- 
- // 2. Código en línea y tachado
- formatted = formatted.replace(/`(.*?)`/g, '<code>$1</code>');
- formatted = formatted.replace(/~~(.*?)~~/g, '<del>$1</del>');
- 
- // 3. Negrita + Cursiva (***texto*** o ___texto___) - PROCESAR PRIMERO
- formatted = formatted.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
- formatted = formatted.replace(/___(.*?)___/g, '<strong><em>$1</em></strong>');
- 
- // 4. Negrita pura (**texto** o __texto__)
- formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
- formatted = formatted.replace(/__(.*?)__/g, '<strong>$1</strong>');
- 
- // 5. Cursiva pura (*texto* o _texto_) - PROCESAR AL FINAL
- formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
- formatted = formatted.replace(/_(.*?)_/g, '<em>$1</em>');
- 
- return formatted;
- }
+    function saveToLocalStorage() {
+      localStorage.setItem("gw4_multichats", JSON.stringify(chatsData));
+    }
 
+    // Cambiador del System Prompt Libre
+    function editSystemPrompt() {
+      const customPrompt = prompt("Instrucciones de la IA:", currentSystemPrompt);
+      if (customPrompt !== null && customPrompt.trim() !== "") {
+        currentSystemPrompt = customPrompt.trim();
+        document.getElementById("chatBox").innerHTML += `<div class="message system-message">⚙️ Prompt personalizado aplicado.</div>`;
+        window.scrollTo(0, document.body.scrollHeight);
+      }
+    }
+
+    // Controladores de Envío de Mensajes
     function handleKeyPress(event) {
-        if (event.key === "Enter") sendMessage();
+      if (event.key === "Enter") sendMessage();
     }
 
     async function sendMessage() {
-        const inputField = document.getElementById("userInput");
-        const chatBox = document.getElementById("chatBox");
-        const userText = inputField.value.trim();
-
-        if (userText === "") return;
-
-        chatBox.innerHTML += `<div class="message user-message">${userText}</div>`;
+      const inputField = document.getElementById("userInput");
+      const chatBox = document.getElementById("chatBox");
+      const userText = inputField.value.trim();
+      if (userText === "") return;
+      
+      // Comando invisible para borrar todo el almacenamiento local
+      if (userText.toLowerCase() === '/clear') {
+        localStorage.clear();
+        chatsData = {};
         inputField.value = "";
-        window.scrollTo(0, document.body.scrollHeight);
+        createNewChat();
+        return;
+      }
 
-        chatHistory.push({
-            role: "user",
-            parts: [{ text: userText }]
+      chatBox.innerHTML += `<div class="message user-message">${userText}</div>`;
+      inputField.value = "";
+      window.scrollTo(0, document.body.scrollHeight);
+      
+      chatHistory.push({ role: "user", parts: [{ text: userText }] });
+      
+      // Renombrar el título dinámicamente con el primer mensaje
+      if (chatsData[currentChatId].title === "Nuevo Chat 📝") {
+        chatsData[currentChatId].title = userText.substring(0, 15) + (userText.length > 15 ? "..." : "");
+      }
+      
+      chatsData[currentChatId].history = chatHistory;
+      saveToLocalStorage();
+      
+      await requestAIResponse();
+    }
+
+    // Petición HTTP a la API de Gemini
+    async function requestAIResponse() {
+      const chatBox = document.getElementById("chatBox");
+      
+      // Indicador de carga súper minimalista
+      const loadingDiv = document.createElement("div");
+      loadingDiv.className = "message ai-message";
+      loadingDiv.id = "loadingIndicator";
+      loadingDiv.innerText = "Pensando...";
+      chatBox.appendChild(loadingDiv);
+      window.scrollTo(0, document.body.scrollHeight);
+
+      try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${API_KEY}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: chatHistory,
+            systemInstruction: { parts: [{ text: currentSystemPrompt }] }
+          })
         });
 
-        await requestAIResponse();
-    }
+        document.getElementById("loadingIndicator").remove();
 
-    async function requestAIResponse() {
-        const chatBox = document.getElementById("chatBox");
-        const base64Key = BASE64_KEYS[currentModel];
-       
-        const loadingId = "loading-" + Date.now();
-        chatBox.innerHTML += `<div id="${loadingId}" class="message ai-message" style="color: #8899a6;"><em>Thinking...</em></div>`;
-        window.scrollTo(0, document.body.scrollHeight);
-
-        try {
-            const decryptedApiKey = atob(base64Key);
-
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${decryptedApiKey}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    systemInstruction: {
-                        parts: [{ text: "You are an expert, helpful, and direct assistant. Always use clear formatting like short paragraphs, bullet points, and bold text, and maintain a polite tone. If you lack accurate information, simply state that you do not have that data. Adapt to the user's language." }]
-                    },
-                    contents: chatHistory
-                })
-            });
-
-            const data = await response.json();
-           
-            const loadingEl = document.getElementById(loadingId);
-            if (loadingEl) loadingEl.remove();
-
-            if (response.ok) {
-                let aiResponse = data.candidates[0].content.parts[0].text;
-               
-                // 🛡️ ESCUDO ANTI-BUCLE JAVASCRIPT
-                const frases = aiResponse.split(/[.:\n]/);
-                for (let f of frases) {
-                    let cleanF = f.trim();
-                    if (cleanF.length > 15 && aiResponse.split(cleanF).length > 3) {
-                        aiResponse = cleanF + ". *[Bucle infinito de identidad detectado y bloqueado por seguridad]*";
-                        break;
-                    }
-                }
-
-                const formattedResponse = parseMarkdown(aiResponse);
-                chatBox.innerHTML += `<div class="message ai-message">${formattedResponse}</div>`;
-               
-                chatHistory.push({
-                    role: "model",
-                    parts: [{ text: aiResponse }]
-                });
-
-            } else if (response.status === 429 && currentModel === "gemini-2.5-flash") {
-                currentModel = "gemini-2.5-flash-lite";
-                updateModelIndicator();
-                await requestAIResponse();
-               
-            } else {
-                chatHistory.pop();
-                const errorMsg = data.error ? data.error.message : "Unknown error";
-                chatBox.innerHTML += `<div class="message system-message">Error: ${errorMsg}</div>`;
+        if (response.ok) {
+          const data = await response.json();
+          let aiResponse = data.candidates[0].content.parts[0].text;
+          
+          // Escudo protector anti-bucle repetitivo
+          const frases = aiResponse.split(/[.:\n]/);
+          for (let f of frases) {
+            let cleanF = f.trim();
+            if (cleanF.length > 15 && aiResponse.split(cleanF).length > 3) {
+              aiResponse = cleanF + ". *[Bucle de texto mitigado]*";
+              break;
             }
-        } catch (error) {
-            const loadingEl = document.getElementById(loadingId);
-            if (loadingEl) loadingEl.remove();
-            chatHistory.pop();
-            chatBox.innerHTML += `<div class="message system-message">Error: Request failed.</div>`;
+          }
+          
+          const formattedResponse = parseMarkdown(aiResponse);
+          chatBox.innerHTML += `<div class="message ai-message">${formattedResponse}</div>`;
+          
+          chatHistory.push({ role: "model", parts: [{ text: aiResponse }] });
+          chatsData[currentChatId].history = chatHistory;
+          saveToLocalStorage();
+        } else {
+          chatBox.innerHTML += `<div class="message ai-message" style="color:#ff453a;">Error de API. Revisa tu Key.</div>`;
         }
-        window.scrollTo(0, document.body.scrollHeight);
+      } catch (error) {
+        if(document.getElementById("loadingIndicator")) document.getElementById("loadingIndicator").remove();
+        chatBox.innerHTML += `<div class="message ai-message" style="color:#ff453a;">Error de conexión.</div>`;
+      }
+      window.scrollTo(0, document.body.scrollHeight);
     }
 
-    // 🚀 Inicialización del indicador al cargar la app
-    updateModelIndicator();
-</script>
+    // Parser manual ultra fluido de Markdown corregido
+    function parseMarkdown(text) {
+      const lines = text.split('\n');
+      let htmlResult = [];
+      let inList = false;
+
+      lines.forEach(line => {
+        let cleanLine = line.trim();
+
+        // 1. Líneas horizontales (--- o ***)
+        if (cleanLine === '---' || cleanLine === '***') {
+          if (inList) { htmlResult.push('</ul>'); inList = false; }
+          htmlResult.push('<hr>');
+          return;
+        }
+
+        // 2. Citas en bloque (> texto)
+        if (cleanLine.startsWith('> ')) {
+          if (inList) { htmlResult.push('</ul>'); inList = false; }
+          htmlResult.push(`<blockquote>${formatInlineMarkdown(cleanLine.substring(2))}</blockquote>`);
+          return;
+        }
+
+        // 3. Títulos (Headers)
+        if (cleanLine.startsWith('# ')) {
+          if (inList) { htmlResult.push('</ul>'); inList = false; }
+          htmlResult.push(`<h1>${formatInlineMarkdown(cleanLine.substring(2))}</h1>`);
+          return;
+        }
+        if (cleanLine.startsWith('## ')) {
+          if (inList) { htmlResult.push('</ul>'); inList = false; }
+          htmlResult.push(`<h2>${formatInlineMarkdown(cleanLine.substring(3))}</h2>`);
+          return;
+        }
+        if (cleanLine.startsWith('### ')) {
+          if (inList) { htmlResult.push('</ul>'); inList = false; }
+          htmlResult.push(`<h3>${formatInlineMarkdown(cleanLine.substring(4))}</h3>`);
+          return;
+        }
+
+        // 4. Listas ordenadas/no ordenadas
+        if (cleanLine.startsWith('* ') || cleanLine.startsWith('- ')) {
+          if (!inList) { htmlResult.push('<ul>'); inList = true; }
+          htmlResult.push(`<li>${formatInlineMarkdown(cleanLine.substring(2))}</li>`);
+          return;
+        }
+
+        // Cerrar listas si la línea es un párrafo normal
+        if (cleanLine === '') {
+          if (inList) { htmlResult.push('</ul>'); inList = false; }
+          return;
+        }
+
+        if (inList) { htmlResult.push('</ul>'); inList = false; }
+        htmlResult.push(`<p>${formatInlineMarkdown(line)}</p>`);
+      });
+
+      if (inList) htmlResult.push('</ul>');
+      return htmlResult.join('');
+    }
+
+    // Formateador en línea (Regex ordenados: 3 ast -> 2 ast -> 1 ast)
+    function formatInlineMarkdown(text) {
+      let formatted = text;
+      
+      // Código en línea y tachado
+      formatted = formatted.replace(/`(.*?)`/g, '<code>$1</code>');
+      formatted = formatted.replace(/~~(.*?)~~/g, '<del>$1</del>');
+      
+      // Negrita + Cursiva (***)
+      formatted = formatted.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
+      formatted = formatted.replace(/___(.*?)___/g, '<strong><em>$1</em></strong>');
+      
+      // Negrita pura (**)
+      formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      formatted = formatted.replace(/__(.*?)__/g, '<strong>$1</strong>');
+      
+      // Cursiva pura (*)
+      formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
+      formatted = formatted.replace(/_(.*?)_/g, '<em>$1</em>');
+      
+      return formatted;
+    }
+
+    // Inicialización del Chat actual de la base de datos local
+    if (!currentChatId || !chatsData[currentChatId]) {
+      createNewChat();
+    } else {
+      loadChat(currentChatId);
+    }
+  </script>
 </body>
 </html>
