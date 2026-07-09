@@ -396,7 +396,8 @@ headers: {
 },
 body: JSON.stringify({
 model: currentModel,
-messages: formattedMessages
+messages: formattedMessages,
+  max_tokens: 4000
 })
 });
 
