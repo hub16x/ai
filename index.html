@@ -248,7 +248,7 @@ margin: 12px 0;
 <script>
 // CONFIGURACIÓN PARA OPENROUTER (Gemini 2.5 Flash Sin Límites)
 let API_KEY = localStorage.getItem("gw4_api_key") || "";
-const currentModel = "google/gemini-2.5-flash:free";
+const currentModel = "google/gemini-2.0-flash-exp:free";
 
 // Variables de Estado y Persistencia Multi-Chat
 let currentSystemPrompt = "Eres un asistente personal ultra-directo, útil y conciso. Responde siempre en español. Usa párrafos muy extensos, profundiza en el tema, usa negritas y viñetas para que se lea bien en un reloj inteligente de 1.4 pulgadas. Proiridad de markdown: `#` y `##`, usa mas ** que cursiva o ambos. Proiridad: listas ordenadas. Las etiquetas HTML estan permitidas, puedes usar <br>, etc... **ESTRICTAMENTE PROHIBIDO:** Usar <script>, <style>, sin ```html, por favor, ```html no ejecutara codigo plano. si escribes Hola! <br> ¿En que..., si, las etiquetas funcionaran. No puedes usar <style>, pero **sí** <p style='color: blue'>Este texto esta en azul</p>. Las respuestas de mas de **15370** tokens se veran acortadas. Intenta no pasarte de eso";
