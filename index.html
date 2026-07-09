@@ -289,6 +289,15 @@ function updateModelIndicator() {
             } else if (cleanLine.startsWith('# ')) {
                 if (inList) { htmlResult.push('</ul>'); inList = false; }
                 htmlResult.push(`<h1>${formatInlineMarkdown(cleanLine.substring(2))}</h1>`);
+                } else if (cleanLine === '---' || cleanLine === '***') {
+    if (inList) { htmlResult.push('</ul>'); inList = false; }
+    if (inTable) { htmlResult.push('</tbody></table></div>'); inTable = false; }
+    htmlResult.push('<hr style="border:0;border-top:1px solid #333;margin:12px 0;">');
+
+// ─── 2. AÑADIR AQUÍ LAS CITAS EN BLOQUE (>) ───
+} else if (cleanLine.startsWith('> ')) {
+    if (inList) { htmlResult.push('</ul>'); inList = false; }
+    htmlResult.push(`<blockquote style="margin:8px 0;padding-left:10px;border-left:3px solid #00ffcc;color:#888;font-style:italic;">${formatInlineMarkdown(cleanLine.substring(2))}</blockquote>`);
             } else if (cleanLine.startsWith('* ') || cleanLine.startsWith('- ')) {
                 if (!inList) { htmlResult.push('<ul>'); inList = true; }
                 htmlResult.push(`<li>${formatInlineMarkdown(cleanLine.substring(2))}</li>`);
