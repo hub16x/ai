@@ -397,7 +397,7 @@ headers: {
 body: JSON.stringify({
 model: currentModel,
 messages: formattedMessages,
-  max_tokens: 65535
+max_tokens: 16000
 })
 });
 
@@ -473,12 +473,27 @@ if (inList) { htmlResult.push('</ul>'); inList = false; }
 htmlResult.push(`<h3>${formatInlineMarkdown(cleanLine.substring(4))}</h3>`);
 return;
 }
-
+if (cleanLine.startsWith('#### ')) {
+if (inList) { htmlResult.push('</ul>'); inList = false; }
+htmlResult.push(`<h4>${formatInlineMarkdown(cleanLine.substring(4))}</h4>`);
+return;
+}
+if (cleanLine.startsWith('##### ')) {
+if (inList) { htmlResult.push('</ul>'); inList = false; }
+htmlResult.push(`<h5>${formatInlineMarkdown(cleanLine.substring(4))}</h5>`);
+return;
+}
+if (cleanLine.startsWith('###### ')) {
+if (inList) { htmlResult.push('</ul>'); inList = false; }
+htmlResult.push(`<h6>${formatInlineMarkdown(cleanLine.substring(4))}</h6>`);
+return;
+}
 if (cleanLine.startsWith('* ') || cleanLine.startsWith('- ')) {
 if (!inList) { htmlResult.push('<ul>'); inList = true; }
 htmlResult.push(`<li>${formatInlineMarkdown(cleanLine.substring(2))}</li>`);
 return;
 }
+  
 
 if (cleanLine === '') {
 if (inList) { htmlResult.push('</ul>'); inList = false; }
