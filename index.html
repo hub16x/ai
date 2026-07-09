@@ -281,8 +281,9 @@
     </div>
 
     <script>
+// CONFIGURACIÓN PARA OPENROUTER (Gemini 2.5 Flash Sin Límites)
 let API_KEY = localStorage.getItem("gw4_api_key") || "";
-const currentModel = "gemini-2.5-flash";
+const currentModel = "google/gemini-2.5-flash"; // El modelo inteligente de Google
 
     // Variables de Estado y Persistencia Multi-Chat
     let currentSystemPrompt = "Eres un asistente personal ultra-directo, útil y conciso. Responde siempre en español. Usa párrafos muy extensos, profundiza en el tema, usa negritas y viñetas para que se lea bien en un reloj inteligente de 1.4 pulgadas. Proiridad de markdown: `#` y `##`, usa mas ** que cursiva o ambos. Proiridad: listas ordenadas. Las etiquetas HTML estan permitidas, puedes usar <br>, etc... **ESTRICTAMENTE PROHIBIDO:** Usar <script>, <style>, sin ```html, por favor, ```html no ejecutara codigo plano. si escribes Hola! <br> ¿En que..., si, las etiquetas funcionaran. No puedes usar <style>, pero **sí** <p style='color: blue'>Este texto esta en azul</p>.";
@@ -365,23 +366,68 @@ function loadChat(id) {
       if (event.key === "Enter") sendMessage();
     }
 
-    async function sendMessage() {
-      const inputField = document.getElementById("userInput");
-      const chatBox = document.getElementById("chatBox");
-      const userText = inputField.value.trim();
-      if (userText === "") return;
-// COMANDO SECRETO CORREGIDO (Acepta cualquier formato de clave)
-if (userText.startsWith('/key ')) {
-  const nuevaKey = userText.substring(5).trim();
-  if (nuevaKey.length > 10) { // Solo comprueba que no esté vacía
+async function sendMessage() {
+  const inputField = document.getElementById("userInput");
+  const userText = inputField.value.trim();
+  if (!userText) return;
+
+  const chatBox = document.getElementById("chatBox");
+
+  // COMANDO SECRETO PARA GUARDAR LA KEY EN EL RELOJ
+  if (userText.startsWith('/key ')) {
+    const nuevaKey = userText.substring(5).trim();
     localStorage.setItem("gw4_api_key", nuevaKey);
     API_KEY = nuevaKey;
-    chatBox.innerHTML += `<div class="message system-message" style="background:#112211; color:#00ffcc;">🔑 ¡Clave guardada en el reloj con éxito!</div>`;
-  } else {
-    chatBox.innerHTML += `<div class="message system-message" style="background:#221111; color:#ff5555;">❌ Error al guardar la clave.</div>`;
+    chatBox.innerHTML += `<div class="message system-message" style="background:#112211; color:#00ffcc;">🔑 ¡Clave de OpenRouter guardada!</div>`;
+    inputField.value = "";
+    return;
   }
+
+  // Pintar mensaje del usuario
+  chatBox.innerHTML += `<div class="message user-message">${userText}</div>`;
   inputField.value = "";
-  return;
+  window.scrollTo(0, document.body.scrollHeight);
+
+  if (!API_KEY) {
+    chatBox.innerHTML += `<div class="message ai-message" style="color:#ff5555;">❌ Configura tu clave con /key sk-or-v1...</div>`;
+    return;
+  }
+
+  // Guardar en historial interno
+  chatHistory.push({ role: "user", content: userText });
+
+  try {
+    // URL universal de OpenRouter
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${API_KEY}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://github.com", // Obligatorio para OpenRouter
+        "X-Title": "Galaxy Watch Chat"
+      },
+      body: JSON.stringify({
+        model: currentModel,
+        messages: chatHistory.map(msg => ({ role: msg.role, content: msg.content }))
+      })
+    });
+
+    const data = await response.json();
+    
+    if (data.choices && data.choices[0]) {
+      const aiReply = data.choices[0].message.content;
+      chatHistory.push({ role: "assistant", content: aiReply });
+      
+      // Mostrar respuesta parseada
+      chatBox.innerHTML += `<div class="message ai-message">${parseMarkdown(aiReply)}</div>`;
+    } else {
+      chatBox.innerHTML += `<div class="message ai-message" style="color:#ff5555;">❌ Error API: ${data.error ? data.error.message : 'Respuesta vacía'}</div>`;
+    }
+  } catch (error) {
+    chatBox.innerHTML += `<div class="message ai-message" style="color:#ff5555;">❌ Error de conexión.</div>`;
+  }
+
+  window.scrollTo(0, document.body.scrollHeight);
 }
       
       // Comando invisible para borrar todo el almacenamiento local
