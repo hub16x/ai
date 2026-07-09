@@ -1,257 +1,368 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>GW4 Gemini UI</title>
-<style>
-/* Estilos base optimizados para AMOLED (Negro Puro #000) */
-* {
-box-sizing: border-box;
-margin: 0;
-padding: 0;
-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
--webkit-tap-highlight-color: transparent;
-}
-body {
-background-color: #000000;
-color: #ffffff;
-overflow-x: hidden;
-}
-/* Contenedor principal */
-.chat-container {
-display: flex;
-flex-direction: column;
-min-height: 100vh;
-padding: 24px 8px 60px 8px;
-}
-/* Cabecera fija */
-.chat-header {
-display: flex;
-justify-content: space-between;
-align-items: center;
-padding: 6px 12px;
-background-color: #000000;
-border-bottom: 1px solid #1a1a1a;
-position: sticky;
-top: 0;
-z-index: 100;
-}
-.chat-header-title {
-cursor: pointer;
-text-decoration: underline;
-color: #00ffcc;
-font-size: 13px;
-font-weight: bold;
-}
-.model-badge {
-font-size: 10px;
-background: #1c1c1e;
-padding: 2px 6px;
-border-radius: 8px;
-color: #aaaaaa;
-border: 1px solid #333333;
-}
-/* Zona de Mensajes */
-.chat-box {
-flex: 1;
-display: flex;
-flex-direction: column;
-gap: 10px;
-padding: 12px 4px;
-}
-.message {
-max-width: 90%;
-padding: 8px 12px;
-border-radius: 14px;
-font-size: 13px;
-line-height: 1.4;
-word-wrap: break-word;
-}
-.user-message {
-background-color: #1c1c1e;
-color: #ffffff;
-align-self: flex-end;
-border-bottom-right-radius: 2px;
-}
-.ai-message {
-background-color: #0a0a0a;
-color: #e5e5e7;
-align-self: flex-start;
-border-bottom-left-radius: 2px;
-border: 1px solid #1a1a1a;
-}
-.system-message {
-max-width: 100%;
-background: #1e1b4b;
-color: #a5b4fc;
-border: 1px solid #3730a3;
-align-self: center;
-text-align: center;
-font-size: 11px;
-}
-/* Caja de entrada de texto inferior */
-.input-group {
-position: fixed;
-bottom: 0;
-left: 0;
-width: 100%;
-background: #000000;
-padding: 6px 8px;
-display: flex;
-gap: 6px;
-border-top: 1px solid #1a1a1a;
-z-index: 100;
-}
-.input-group input {
-flex: 1;
-background: #1c1c1e;
-border: 1px solid #333333;
-color: white;
-padding: 8px 12px;
-border-radius: 20px;
-font-size: 13px;
-outline: none;
-}
-.send-btn {
-background: #00ffcc;
-border: none;
-width: 34px;
-height: 34px;
-border-radius: 50%;
-display: flex;
-align-items: center;
-justify-content: center;
-cursor: pointer;
-}
-.send-btn svg {
-width: 16px;
-height: 16px;
-fill: #000000;
-}
-/* MENÚ LATERAL DESPLEGABLE (100% PANTALLA) */
-.sidebar {
-position: fixed;
-top: 0;
-left: -100%;
-width: 100vw;
-height: 100vh;
-background-color: #000000;
-z-index: 200;
-transition: left 0.2s cubic-bezier(0, 0, 0.2, 1);
-padding: 28px 16px;
-box-sizing: border-box;
-display: flex;
-flex-direction: column;
-gap: 12px;
-overflow-y: auto;
-}
-.sidebar.open {
-left: 0;
-}
-.menu-btn {
-background: #1c1c1e;
-color: #ffffff;
-border: 1px solid #333333;
-padding: 12px;
-border-radius: 12px;
-font-size: 13px;
-text-align: left;
-cursor: pointer;
-word-wrap: break-word;
-font-weight: 500;
-}
-.menu-btn-new {
-background: #0055ff;
-border: none;
-text-align: center;
-font-weight: bold;
-color: white;
-}
-.close-menu-btn {
-background: transparent;
-border: none;
-color: #ff5555;
-text-align: center;
-font-size: 13px;
-margin-top: auto;
-padding: 10px;
-}
-/* Reglas para elementos Markdown renderizados */
-.ai-message strong {
-color: #ffffff;
-font-weight: bold;
-}
-.ai-message em {
-font-style: italic;
-}
-.ai-message code {
-background: #2c2c2e;
-padding: 2px 4px;
-border-radius: 4px;
-font-family: monospace;
-font-size: 11px;
-color: #ff453a;
-}
-.ai-message ul {
-margin-left: 16px;
-margin-top: 4px;
-margin-bottom: 4px;
-}
-.ai-message li {
-margin-bottom: 2px;
-}
-.ai-message h1,
-.ai-message h2,
-.ai-message h3 {
-font-size: 14px;
-margin-top: 6px;
-margin-bottom: 2px;
-color: #00ffcc;
-}
-.ai-message blockquote {
-margin: 8px 0;
-padding-left: 10px;
-border-left: 3px solid #00ffcc;
-color: #aaaaaa;
-font-style: italic;
-}
-.ai-message hr {
-border: 0;
-border-top: 1px solid #333333;
-margin: 12px 0;
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>GW4 Gemini Direct UI</title>
+  <style>
+    /* Estilos base optimizados para AMOLED (Negro Puro #000) */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: #000000;
+      color: #ffffff;
+      overflow-x: hidden;
+    }
+
+    /* Contenedor principal */
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 24px 8px 60px 8px;
+    }
+
+    /* Cabecera fija */
+    .chat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 12px;
+      background-color: #000000;
+      border-bottom: 1px solid #1a1a1a;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .chat-header-title {
+      cursor: pointer;
+      text-decoration: underline;
+      color: #00ffcc;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .model-badge {
+      font-size: 10px;
+      background: #1c1c1e;
+      padding: 2px 6px;
+      border-radius: 8px;
+      color: #aaaaaa;
+      border: 1px solid #333333;
+    }
+
+    /* Zona de Mensajes */
+    .chat-box {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 12px 4px;
+    }
+
+    .message {
+      max-width: 90%;
+      padding: 8px 12px;
+      border-radius: 14px;
+      font-size: 13px;
+      line-height: 1.4;
+      word-wrap: break-word;
+    }
+
+    .user-message {
+      background-color: #1c1c1e;
+      color: #ffffff;
+      align-self: flex-end;
+      border-bottom-right-radius: 2px;
+    }
+
+    .ai-message {
+      background-color: #0a0a0a;
+      color: #e5e5e7;
+      align-self: flex-start;
+      border-bottom-left-radius: 2px;
+      border: 1px solid #1a1a1a;
+    }
+
+    .system-message {
+      max-width: 100%;
+      background: #1e1b4b;
+      color: #a5b4fc;
+      border: 1px solid #3730a3;
+      align-self: center;
+      text-align: center;
+      font-size: 11px;
+    }
+
+    /* Caja de entrada de texto inferior */
+    .input-group {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: #000000;
+      padding: 6px 8px;
+      display: flex;
+      gap: 6px;
+      border-top: 1px solid #1a1a1a;
+      z-index: 100;
+    }
+
+    .input-group input {
+      flex: 1;
+      background: #1c1c1e;
+      border: 1px solid #333333;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .send-btn {
+      background: #00ffcc;
+      border: none;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .send-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: #000000;
+    }
+
+    /* MENÚ LATERAL DESPLEGABLE (100% PANTALLA) */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -100%;
+      width: 100vw;
+      height: 100vh;
+      background-color: #000000;
+      z-index: 200;
+      transition: left 0.2s cubic-bezier(0, 0, 0.2, 1);
+      padding: 28px 16px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+    }
+
+    .sidebar.open {
+      left: 0;
+    }
+
+    .menu-btn {
+      background: #1c1c1e;
+      color: #ffffff;
+      border: 1px solid #333333;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      text-align: left;
+      cursor: pointer;
+      word-wrap: break-word;
+      font-weight: 500;
+    }
+
+    .menu-btn-new {
+      background: #0055ff;
+      border: none;
+      text-align: center;
+      font-weight: bold;
+      color: white;
+    }
+
+    .close-menu-btn {
+      background: transparent;
+      border: none;
+      color: #ff5555;
+      text-align: center;
+      font-size: 13px;
+      margin-top: auto;
+      padding: 10px;
+    }
+
+    /* Reglas de renderizado de elementos Markdown en el asistente */
+    .ai-message strong {
+      color: #ffffff;
+      font-weight: bold;
+    }
+
+    .ai-message em {
+      font-style: italic;
+    }
+
+    .ai-message code {
+      background: #2c2c2e;
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 11px;
+      color: #ff453a;
+    }
+
+    /* Estilos para enlaces */
+    .ai-message a {
+      color: #00ffcc;
+      text-decoration: underline;
+    }
+
+    /* Estilo para bloques de código preformateados (```python, etc.) */
+    .ai-message pre {
+      background: #111111;
+      padding: 8px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 8px 0;
+      border: 1px solid #1a1a1a;
+      width: 100%;
+    }
+
+    .ai-message pre code {
+      font-family: monospace;
+      font-size: 11px;
+      color: #ff9f0a;
+      background: transparent;
+      padding: 0;
+      border-radius: 0;
+      white-space: pre;
+    }
+
+    .ai-message ul {
+      margin-left: 16px;
+      margin-top: 4px;
+      margin-bottom: 4px;
+    }
+
+    .ai-message ol {
+      margin-left: 16px;
+      margin-top: 4px;
+      margin-bottom: 4px;
+    }
+
+    .ai-message li {
+      margin-bottom: 2px;
+    }
+
+    .ai-message h1,
+    .ai-message h2,
+    .ai-message h3 {
+      font-size: 14px;
+      margin-top: 6px;
+      margin-bottom: 2px;
+      color: #00ffcc;
+    }
+
+    .ai-message blockquote {
+      margin: 8px 0;
+      padding-left: 10px;
+      border-left: 3px solid #00ffcc;
+      color: #aaaaaa;
+      font-style: italic;
+    }
+
+    .ai-message hr {
+      border: 0;
+      border-top: 1px solid #333333;
+      margin: 12px 0;
+    }
+
+    /* Contenedor de código con cabecera y botón de copiar */
+    .code-container {
+      background: #111111;
+      border: 1px solid #1a1a1a;
+      border-radius: 8px;
+      margin: 8px 0;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .code-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #1c1c1e;
+      padding: 4px 8px;
+      border-bottom: 1px solid #1a1a1a;
+    }
+
+    .code-lang {
+      font-size: 10px;
+      font-family: monospace;
+      color: #aaaaaa;
+      text-transform: lowercase;
+      /* Fuerza el lenguaje a minúsculas */
+    }
+
+    .copy-btn {
+      background: transparent;
+      border: none;
+      color: #00ffcc;
+      font-size: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      padding: 2px 6px;
+    }
+
+    .copy-btn:active {
+      opacity: 0.7;
+    }
+
+    /* Estilo del pre adaptado al contenedor */
+    .code-container pre {
+      margin: 0 !important;
+      border: none !important;
+      border-radius: 0 !important;
+      background: transparent !important;
+    }
+  </style>
 </head>
+
 <body>
-<div id="sidebarMenu" class="sidebar">
-<button class="menu-btn menu-btn-new" onclick="createNewChat()">➕ Nuevo Chat</button>
-<div id="chatsList" style="display: flex; flex-direction: column; gap: 8px;"></div>
-<button class="close-menu-btn" onclick="toggleMenu()">❌ Cerrar Menú</button>
-</div>
-<div class="chat-container">
-<div class="chat-header">
-<div style="display: flex; align-items: center; gap: 8px;">
-<span onclick="toggleMenu()" style="cursor: pointer; font-size: 18px; color: #00ffcc; padding-right: 4px;">☰</span>
-<span class="chat-header-title" onclick="editSystemPrompt()">⚙️ IA</span>
-</div>
-<span id="modelIndicator" class="model-badge">⚡ Flash 2.5</span>
-</div>
-<div class="chat-box" id="chatBox"></div>
-<div class="input-group">
-<input type="text" id="userInput" placeholder="Escribe..." onkeypress="handleKeyPress(event)">
-<button class="send-btn" onclick="sendMessage()">
+  <div id="sidebarMenu" class="sidebar">
+    <button class="menu-btn menu-btn-new" onclick="createNewChat()">➕ Nuevo Chat</button>
+    <div id="chatsList" style="display: flex; flex-direction: column; gap: 8px;"></div>
+    <button class="close-menu-btn" onclick="toggleMenu()">❌ Cerrar Menú</button>
+  </div>
+  <div class="chat-container">
+    <div class="chat-header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span onclick="toggleMenu()" style="cursor: pointer; font-size: 18px; color: #00ffcc; padding-right: 4px;">☰</span>
+        <span class="chat-header-title" onclick="editSystemPrompt()">⚙️ IA</span>
+      </div>
+      <span class="model-badge">⚡ GEMINI 2.5 FLASH</span>
+    </div>
+    <div class="chat-box" id="chatBox"></div>
+    <div class="input-group">
+      <input type="text" id="userInput" placeholder="Escribe..." onkeypress="handleKeyPress(event)">
+      <button class="send-btn" onclick="sendMessage()">
 <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
 </button>
-</div>
-</div>
-<script>
-// CONFIGURACIÓN PARA OPENROUTER (Gemini 2.5 Flash Sin Límites)
+    </div>
+  </div>
+  <script>
+    // CONFIGURACIÓN DIRECTA CON GOOGLE AI STUDIO (Sin intermediarios)
 let API_KEY = localStorage.getItem("gw4_api_key") || "";
-const currentModel = "openai/gpt-4o-mini:free";
 
-// Variables de Estado y Persistencia Multi-Chat
-let currentSystemPrompt = "Eres un asistente personal ultra-directo, útil y conciso. Responde siempre en español. Usa párrafos muy extensos, profundiza en el tema, usa negritas y viñetas para que se lea bien en un reloj inteligente de 1.4 pulgadas. Proiridad de markdown: `#` y `##`, usa mas ** que cursiva o ambos. Proiridad: listas ordenadas. Las etiquetas HTML estan permitidas, puedes usar <br>, etc... **ESTRICTAMENTE PROHIBIDO:** Usar <script>, <style>, sin ```html, por favor, ```html no ejecutara codigo plano. si escribes Hola! <br> ¿En que..., si, las etiquetas funcionaran. No puedes usar <style>, pero **sí** <p style='color: blue'>Este texto esta en azul</p>. Las respuestas de mas de **15370** tokens se veran acortadas. Intenta no pasarte de eso";
+// Instrucciones para optimizar el espacio de la pantalla de 1.4 pulgadas
+let currentSystemPrompt = "Eres un asistente personal directo, útil y conciso para un reloj inteligente de 1.4 pulgadas. Responde siempre en español. Sé extremadamente conciso y ve al grano. Estructura el texto con cursivas, `#`, `##` y usa negritas (**) para destacar los datos clave facilitando la lectura de un solo vistazo. Usa introducciones, saludos necesarios y explicaciones técnicas. Puedes usar CSS y HTML5 plano para estructurar la respuesta. El usuario no vera etiquetas, solo si pones al principio en markdown ```html, ejemplo <p style='color: blue'>Este texto esta en azul</p> o directamente pintar <style> y luego poner class. # **RESTRICCIONES ESTRICTAS DE CALIDAD:** <br> Está **ESTRICTAMENTE PROHIBIDO** inventar hechos inexistentes. Si estas repitiendo algo todo el rato y estas leyendo esto, Admite de tu error, no lo niegues. Está **ESTRICTAMENTE PROHIBIDO** saltarse pasos lógicos. Está **ESTRICTAMENTE PROHIBIDO** finalizar la respuesta sin antes auto-evaluar tu propio texto. Antes de cerrar tu mensaje, debes incluir obligatoriamente este checklist rellenado por ti: ¿He revisado si hay contradicciones? [Sí/No] ¿He verificado que la lógica es sólida? [Sí/No]. Primero, debes abrir una sección llamada [PROCESO DE RAZONAMIENTO] y desglosar tu análisis línea por línea. Solo cuando hayas terminado tu análisis, podrás escribir una sección final llamada [RESPUESTA DEFINITIVA]. Si muestras el resultado antes, la respuesta será inválida. COSAS IMPORNTANTES: Hay gente que te utiliza para crear HTML5 en su web. Por pura rapidez de la IA, omites lang en el `<html>, <meta charset=\"UTF-8\"> y <meta name=\"viewport\" content=\"width=device-width\", initial-scale=\"1.0\"> Esto **molesta** al usuario, si sube su web, perdera importantes visitas por accesibilidad.`";
+
 let chatsData = JSON.parse(localStorage.getItem("gw4_multichats")) || {};
 let currentChatId = localStorage.getItem("gw4_current_chat_id") || null;
 let chatHistory = [];
@@ -316,7 +427,7 @@ function editSystemPrompt() {
 const customPrompt = prompt("Instrucciones de la IA:", currentSystemPrompt);
 if (customPrompt !== null && customPrompt.trim() !== "") {
 currentSystemPrompt = customPrompt.trim();
-document.getElementById("chatBox").innerHTML += `<div class="message system-message">⚙️ Prompt personalizado aplicado.</div>`;
+document.getElementById("chatBox").innerHTML += `<div class="message system-message">⚙️ Prompt aplicado.</div>`;
 window.scrollTo(0, document.body.scrollHeight);
 }
 }
@@ -332,7 +443,7 @@ if (!userText) return;
 
 const chatBox = document.getElementById("chatBox");
 
-// Comando invisible para borrar todo el almacenamiento local
+// Comando para borrar el historial
 if (userText.toLowerCase() === '/clear') {
 localStorage.clear();
 chatsData = {};
@@ -341,37 +452,35 @@ createNewChat();
 return;
 }
 
-// COMANDO SECRETO PARA GUARDAR LA KEY EN EL RELOJ
+// COMANDO PARA GUARDAR LA KEY OFICIAL DE GOOGLE (Comienza con AIzaSy...)
 if (userText.startsWith('/key ')) {
 const nuevaKey = userText.substring(5).trim();
 localStorage.setItem("gw4_api_key", nuevaKey);
 API_KEY = nuevaKey;
-chatBox.innerHTML += `<div class="message system-message" style="background:#112211; color:#00ffcc;">🔑 ¡Clave de OpenRouter guardada!</div>`;
+chatBox.innerHTML += `<div class="message system-message" style="background:#112211; color:#00ffcc;">🔑 Clave oficial de Google guardada con éxito.</div>`;
 inputField.value = "";
 return;
 }
 
-// Pintar mensaje del usuario
+// Mostrar mensaje del usuario en pantalla
 chatBox.innerHTML += `<div class="message user-message">${userText}</div>`;
 inputField.value = "";
 window.scrollTo(0, document.body.scrollHeight);
 
 if (!API_KEY) {
-chatBox.innerHTML += `<div class="message ai-message" style="color:#ff5555;">❌ Configura tu clave con /key sk-or-v1...</div>`;
+chatBox.innerHTML += `<div class="message ai-message" style="color:#ff5555;">❌ Configura tu clave oficial de Google AI Studio con /key AIzaSy...</div>`;
 return;
 }
 
-// Renombrar el título dinámicamente con el primer mensaje
 if (chatsData[currentChatId].title === "Nuevo Chat 📝") {
 chatsData[currentChatId].title = userText.substring(0, 15) + (userText.length > 15 ? "..." : "");
 }
 
-// Guardar en historial interno con formato OpenRouter (OpenAI standard)
 chatHistory.push({ role: "user", content: userText });
 chatsData[currentChatId].history = chatHistory;
 saveToLocalStorage();
 
-// Crear indicador de carga minimalista
+// Indicador de carga
 const loadingDiv = document.createElement("div");
 loadingDiv.className = "message ai-message";
 loadingDiv.id = "loadingIndicator";
@@ -380,136 +489,205 @@ chatBox.appendChild(loadingDiv);
 window.scrollTo(0, document.body.scrollHeight);
 
 try {
-// Generar el array de mensajes incluyendo las instrucciones de sistema
-const formattedMessages = [
-{ role: "system", content: currentSystemPrompt },
-...chatHistory
-];
+// FUSION DE INSTRUCCIONES EN ESPAÑOL: Asegura compatibilidad y evita mezclas de idioma
+let formattedMessages = [];
+if (chatHistory.length > 0) {
+  formattedMessages = chatHistory.map((msg, index) => {
+    if (index === 0 && msg.role === "user") {
+      return {
+        role: "user",
+        content: `[Instrucciones del sistema - Seguir estrictamente: ${currentSystemPrompt}]\n\n${msg.content}`
+      };
+    }
+    return msg;
+  });
+} else {
+  formattedMessages = [{ role: "user", content: userText }];
+}
 
-const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+// Estructura oficial requerida por Gemini
+const formattedContents = formattedMessages.map(msg => ({
+  role: msg.role === "assistant" ? "model" : "user",
+  parts: [{ text: msg.content }]
+}));
+
+const payload = {
+  contents: formattedContents,
+  systemInstruction: {
+    parts: [{ text: currentSystemPrompt }]
+  }
+};
+
+// Petición directa a los servidores oficiales de Google AI Studio
+const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`, {
 method: "POST",
 headers: {
-"Authorization": `Bearer ${API_KEY}`,
-"Content-Type": "application/json",
-"HTTP-Referer": "https://github.com",
-"X-Title": "Galaxy Watch Chat"
+"Content-Type": "application/json"
 },
-body: JSON.stringify({
-model: currentModel,
-messages: formattedMessages,
-})
+body: JSON.stringify(payload)
 });
 
 if (document.getElementById("loadingIndicator")) document.getElementById("loadingIndicator").remove();
 
 if (response.ok) {
 const data = await response.json();
-if (data.choices && data.choices[0]) {
-let aiReply = data.choices[0].message.content;
 
-// Escudo protector anti-bucle repetitivo
-const frases = aiReply.split(/[.:\n]/);
-for (let f of frases) {
-let cleanF = f.trim();
-if (cleanF.length > 15 && aiReply.split(cleanF).length > 3) {
-aiReply = cleanF + ". *[Bucle de texto mitigado]*";
-break;
-}
-}
+// Verificamos si la respuesta contiene el texto generado por Gemini
+if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
+let aiReply = data.candidates[0].content.parts[0].text;
 
+// Renderizamos directamente la respuesta sin filtros innecesarios de repetición
 chatBox.innerHTML += `<div class="message ai-message">${parseMarkdown(aiReply)}</div>`;
 
+// Guardamos en la base de datos local
 chatHistory.push({ role: "assistant", content: aiReply });
 chatsData[currentChatId].history = chatHistory;
 saveToLocalStorage();
 } else {
-chatBox.innerHTML += `<div class="message ai-message" style="color:#ff5555;">❌ Respuesta vacía de OpenRouter.</div>`;
+chatBox.innerHTML += `<div class="message ai-message" style="color:#ff5555;">❌ Error: La API de Google devolvió una respuesta vacía o sin estructura válida.</div>`;
 }
 } else {
 const errorData = await response.json();
-chatBox.innerHTML += `<div class="message ai-message" style="color:#ff453a;">Error de API: ${errorData.error ? errorData.error.message : 'Revisa tu Key.'}</div>`;
+let errorMsg = "Revisa tu clave o cuota de uso.";
+if (errorData.error && errorData.error.message) {
+  errorMsg = errorData.error.message;
+}
+chatBox.innerHTML += `<div class="message ai-message" style="color:#ff453a;">Error de Google API: ${errorMsg}</div>`;
 }
 } catch (error) {
 if (document.getElementById("loadingIndicator")) document.getElementById("loadingIndicator").remove();
-chatBox.innerHTML += `<div class="message ai-message" style="color:#ff453a;">Error de conexión.</div>`;
+chatBox.innerHTML += `<div class="message ai-message" style="color:#ff453a;">Error de conexión con Google.</div>`;
 }
 window.scrollTo(0, document.body.scrollHeight);
 }
 
-// Parser manual ultra fluido de Markdown corregido
+// Parser manual de Markdown robusto corregido
 function parseMarkdown(text) {
 const lines = text.split('\n');
 let htmlResult = [];
 let inList = false;
+let inNumberedList = false;
+let inCodeBlock = false;
+let codeContent = [];
+let codeLanguage = '';
+
+// Cierra cualquier lista activa en la estructura
+function closeActiveLists() {
+  if (inList) { htmlResult.push('</ul>'); inList = false; }
+  if (inNumberedList) { htmlResult.push('</ol>'); inNumberedList = false; }
+}
 
 lines.forEach(line => {
-let cleanLine = line.trim();
+  let cleanLine = line.trim();
 
-if (cleanLine === '---' || cleanLine === '***') {
-if (inList) { htmlResult.push('</ul>'); inList = false; }
-htmlResult.push('<hr>');
-return;
-}
+  // Bloques de código multilínea (```python, ```javascript, etc.)
+  if (cleanLine.startsWith('```')) {
+    closeActiveLists();
+    if (inCodeBlock) {
+      inCodeBlock = false;
+      htmlResult.push(`<pre><code class="language-${codeLanguage}">${codeContent.join('\n')}</code></pre>`);
+      codeContent = [];
+      codeLanguage = '';
+    } else {
+      inCodeBlock = true;
+      codeLanguage = cleanLine.substring(3).trim();
+    }
+    return;
+  }
 
-if (cleanLine.startsWith('> ')) {
-if (inList) { htmlResult.push('</ul>'); inList = false; }
-htmlResult.push(`<blockquote>${formatInlineMarkdown(cleanLine.substring(2))}</blockquote>`);
-return;
-}
+  if (inCodeBlock) {
+    // Escapar caracteres especiales dentro de bloques de código
+    let escapedLine = line
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    codeContent.push(escapedLine);
+    return;
+  }
 
-if (cleanLine.startsWith('# ')) {
-if (inList) { htmlResult.push('</ul>'); inList = false; }
-htmlResult.push(`<h1>${formatInlineMarkdown(cleanLine.substring(2))}</h1>`);
-return;
-}
-if (cleanLine.startsWith('## ')) {
-if (inList) { htmlResult.push('</ul>'); inList = false; }
-htmlResult.push(`<h2>${formatInlineMarkdown(cleanLine.substring(3))}</h2>`);
-return;
-}
-if (cleanLine.startsWith('### ')) {
-if (inList) { htmlResult.push('</ul>'); inList = false; }
-htmlResult.push(`<h3>${formatInlineMarkdown(cleanLine.substring(4))}</h3>`);
-return;
-}
-if (cleanLine.startsWith('#### ')) {
-if (inList) { htmlResult.push('</ul>'); inList = false; }
-htmlResult.push(`<h4>${formatInlineMarkdown(cleanLine.substring(4))}</h4>`);
-return;
-}
-if (cleanLine.startsWith('##### ')) {
-if (inList) { htmlResult.push('</ul>'); inList = false; }
-htmlResult.push(`<h5>${formatInlineMarkdown(cleanLine.substring(4))}</h5>`);
-return;
-}
-if (cleanLine.startsWith('###### ')) {
-if (inList) { htmlResult.push('</ul>'); inList = false; }
-htmlResult.push(`<h6>${formatInlineMarkdown(cleanLine.substring(4))}</h6>`);
-return;
-}
-if (cleanLine.startsWith('* ') || cleanLine.startsWith('- ')) {
-if (!inList) { htmlResult.push('<ul>'); inList = true; }
-htmlResult.push(`<li>${formatInlineMarkdown(cleanLine.substring(2))}</li>`);
-return;
-}
-  
+  // Líneas divisorias
+  if (cleanLine === '---' || cleanLine === '***') {
+    closeActiveLists();
+    htmlResult.push('<hr>');
+    return;
+  }
 
-if (cleanLine === '') {
-if (inList) { htmlResult.push('</ul>'); inList = false; }
-return;
-}
+  // Citas / Blockquotes
+  if (cleanLine.startsWith('> ')) {
+    closeActiveLists();
+    htmlResult.push(`<blockquote>${formatInlineMarkdown(cleanLine.substring(2))}</blockquote>`);
+    return;
+  }
 
-if (inList) { htmlResult.push('</ul>'); inList = false; }
-htmlResult.push(`<p>${formatInlineMarkdown(line)}</p>`);
+  // Encabezados
+  if (cleanLine.startsWith('# ')) {
+    closeActiveLists();
+    htmlResult.push(`<h1>${formatInlineMarkdown(cleanLine.substring(2))}</h1>`);
+    return;
+  }
+  if (cleanLine.startsWith('## ')) {
+    closeActiveLists();
+    htmlResult.push(`<h2>${formatInlineMarkdown(cleanLine.substring(3))}</h2>`);
+    return;
+  }
+  if (cleanLine.startsWith('### ')) {
+    closeActiveLists();
+    htmlResult.push(`<h3>${formatInlineMarkdown(cleanLine.substring(4))}</h3>`);
+    return;
+  }
+  if (cleanLine.startsWith('#### ')) {
+    closeActiveLists();
+    htmlResult.push(`<h4>${formatInlineMarkdown(cleanLine.substring(5))}</h4>`);
+    return;
+  }
+
+  // Listas de viñetas (No numeradas: * o -)
+  if (cleanLine.startsWith('* ') || cleanLine.startsWith('- ')) {
+    if (inNumberedList) { htmlResult.push('</ol>'); inNumberedList = false; }
+    if (!inList) { htmlResult.push('<ul>'); inList = true; }
+    htmlResult.push(`<li>${formatInlineMarkdown(cleanLine.substring(2))}</li>`);
+    return;
+  }
+
+  // Listas numeradas (Ej: 1. Elemento, 2. Elemento)
+  if (/^\d+\.\s/.test(cleanLine)) {
+    if (inList) { htmlResult.push('</ul>'); inList = false; }
+    if (!inNumberedList) { htmlResult.push('<ol>'); inNumberedList = true; }
+    let content = cleanLine.replace(/^\d+\.\s/, '');
+    htmlResult.push(`<li>${formatInlineMarkdown(content)}</li>`);
+    return;
+  }
+
+  // Espacios en blanco
+  if (cleanLine === '') {
+    closeActiveLists();
+    return;
+  }
+
+  // Párrafos normales
+  closeActiveLists();
+  htmlResult.push(`<p>${formatInlineMarkdown(line)}</p>`);
 });
 
-if (inList) htmlResult.push('</ul>');
+closeActiveLists();
 return htmlResult.join('');
 }
 
 function formatInlineMarkdown(text) {
 let formatted = text;
-formatted = formatted.replace(/`(.*?)`/g, '<code>$1</code>');
+
+// Enlaces Markdown: [texto](url) -> etiqueta HTML con estilo AMOLED
+formatted = formatted.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
+
+// Estilos de formato comunes
+// Escapa etiquetas HTML críticas únicamente dentro de las comillas inversas simples (``)
+formatted = formatted.replace(/`(.*?)`/g, function(match, p1) {
+  let escaped = p1
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  return `<code>${escaped}</code>`;
+});
 formatted = formatted.replace(/~~(.*?)~~/g, '<del>$1</del>');
 formatted = formatted.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
 formatted = formatted.replace(/___(.*?)___/g, '<strong><em>$1</em></strong>');
@@ -520,12 +698,29 @@ formatted = formatted.replace(/_(.*?)_/g, '<em>$1</em>');
 return formatted;
 }
 
-// Inicialización del Chat actual de la base de datos local
+// Inicialización de la base de datos local y carga del chat activo
 if (!currentChatId || !chatsData[currentChatId]) {
 createNewChat();
 } else {
 loadChat(currentChatId);
 }
-</script>
+// Función para copiar el código al portapapeles
+function copyCode(button) {
+  const pre = button.parentElement.nextElementSibling;
+  const codeText = pre.querySelector('code').innerText;
+  
+  navigator.clipboard.writeText(codeText).then(() => {
+    button.innerText = 'Copiado';
+    button.style.color = '#aaaaaa';
+    setTimeout(() => {
+      button.innerText = 'Copiar';
+      button.style.color = '#00ffcc';
+    }, 2000);
+  }).catch(err => {
+    console.error('No se pudo copiar: ', err);
+  });
+}
+  </script>
 </body>
+
 </html>
