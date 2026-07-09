@@ -281,10 +281,6 @@
     </div>
 
     <script>
-        // Configuración Inicial de la API
-    // REEMPLAZA EL CONTENIDO DE ESTA VARIABLE CON TU API KEY CODIFICADA EN BASE64
-    const BASE64_KEY = "QVEuQWI4Uk42SkxFdVpwRzdibHFDSFNPYWJFNGhEMmU0YzBxV2k2TV9iQThnUVhUTml3UVE=";
-    // Lee la clave directamente de la memoria del reloj
 let API_KEY = localStorage.getItem("gw4_api_key") || "";
 const currentModel = "gemini-2.5-flash";
 
@@ -294,14 +290,14 @@ const currentModel = "gemini-2.5-flash";
     let currentChatId = localStorage.getItem("gw4_current_chat_id") || null;
     let chatHistory = [];
 
-    // Gestión del Menú de Historial
-    function toggleMenu() {
-      const menu = document.getElementById("sidebarMenu");
-      menu.classList.toggle("open");
-      if (menu.classList.contains("open")) {
-        renderChatsList();
-      }
-    }
+// 1. EL TOGGLE SOLO ABRE Y CIERRA (Sin meterse en bucles)
+function toggleMenu() {
+  const menu = document.getElementById("sidebarMenu");
+  menu.classList.toggle("open");
+  if (menu.classList.contains("open")) {
+    renderChatsList();
+  }
+}
 
     function renderChatsList() {
       const listContainer = document.getElementById("chatsList");
@@ -318,26 +314,30 @@ const currentModel = "gemini-2.5-flash";
       });
     }
 
-    function loadChat(id) {
-      currentChatId = id;
-      localStorage.setItem("gw4_current_chat_id", id);
-      chatHistory = chatsData[id].history || [];
-      
-      const chatBox = document.getElementById("chatBox");
-      chatBox.innerHTML = "";
-      
-      if (chatHistory.length === 0) {
-        chatBox.innerHTML = `<div class="message ai-message">¡Nuevo chat iniciado! ¿En qué te ayudo?</div>`;
-      } else {
-        chatHistory.forEach(msg => {
-          const roleClass = msg.role === "user" ? "user-message" : "ai-message";
-          const content = msg.role === "user" ? msg.parts[0].text : parseMarkdown(msg.parts[0].text);
-          chatBox.innerHTML += `<div class="message ${roleClass}">${content}</div>`;
-        });
-      }
-      toggleMenu();
-      setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 50);
-    }
+// 2. EL LOAD CHAT SOLO CARGA DATOS (Y cierra el menú a capón)
+function loadChat(id) {
+  currentChatId = id;
+  localStorage.setItem("gw4_current_chat_id", id);
+  chatHistory = chatsData[id].history || [];
+  
+  const chatBox = document.getElementById("chatBox");
+  chatBox.innerHTML = "";
+  
+  if (chatHistory.length === 0) {
+    chatBox.innerHTML = `<div class="message ai-message">¡Nuevo chat iniciado! ¿En qué te ayudo?</div>`;
+  } else {
+    chatHistory.forEach(msg => {
+      const roleClass = msg.role === "user" ? "user-message" : "ai-message";
+      const content = msg.role === "user" ? msg.parts[0].text : parseMarkdown(msg.parts[0].text);
+      chatBox.innerHTML += `<div class="message ${roleClass}">${content}</div>`;
+    });
+  }
+  
+  // Forzamos el cierre del menú quitando la clase directamente, SIN pasar por toggleMenu
+  document.getElementById("sidebarMenu").classList.remove("open");
+  
+  setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 50);
+}
 
     function createNewChat() {
       const newId = "chat_" + Date.now();
