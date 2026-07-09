@@ -1,606 +1,516 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GW4 Gemini UI</title>
-    <style>
-        /* Estilos base optimizados para AMOLED (Negro Puro #000) */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: #000000;
-            color: #ffffff;
-            overflow-x: hidden;
-        }
-
-        /* Contenedor principal */
-        .chat-container {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            padding: 24px 8px 60px 8px;
-            /* Margen superior e inferior para pantallas redondas */
-        }
-
-        /* Cabecera fija */
-        .chat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 6px 12px;
-            background-color: #000000;
-            border-bottom: 1px solid #1a1a1a;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .chat-header-title {
-            cursor: pointer;
-            text-decoration: underline;
-            color: #00ffcc;
-            font-size: 13px;
-            font-weight: bold;
-        }
-
-        .model-badge {
-            font-size: 10px;
-            background: #1c1c1e;
-            padding: 2px 6px;
-            border-radius: 8px;
-            color: #aaaaaa;
-            border: 1px solid #333333;
-        }
-
-        /* Zona de Mensajes */
-        .chat-box {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            padding: 12px 4px;
-        }
-
-        .message {
-            max-width: 90%;
-            padding: 8px 12px;
-            border-radius: 14px;
-            font-size: 13px;
-            line-height: 1.4;
-            word-wrap: break-word;
-        }
-
-        .user-message {
-            background-color: #1c1c1e;
-            color: #ffffff;
-            align-self: flex-end;
-            border-bottom-right-radius: 2px;
-        }
-
-        .ai-message {
-            background-color: #0a0a0a;
-            color: #e5e5e7;
-            align-self: flex-start;
-            border-bottom-left-radius: 2px;
-            border: 1px solid #1a1a1a;
-        }
-
-        .system-message {
-            max-width: 100%;
-            background: #1e1b4b;
-            color: #a5b4fc;
-            border: 1px solid #3730a3;
-            align-self: center;
-            text-align: center;
-            font-size: 11px;
-        }
-
-        /* Caja de entrada de texto inferior */
-        .input-group {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: #000000;
-            padding: 6px 8px;
-            display: flex;
-            gap: 6px;
-            border-top: 1px solid #1a1a1a;
-            z-index: 100;
-        }
-
-        .input-group input {
-            flex: 1;
-            background: #1c1c1e;
-            border: 1px solid #333333;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-size: 13px;
-            outline: none;
-        }
-
-        .send-btn {
-            background: #00ffcc;
-            border: none;
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-
-        .send-btn svg {
-            width: 16px;
-            height: 16px;
-            fill: #000000;
-        }
-
-        /* MENÚ LATERAL DESPLEGABLE (100% PANTALLA) */
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: -100%;
-            width: 100vw;
-            height: 100vh;
-            background-color: #000000;
-            z-index: 200;
-            transition: left 0.2s cubic-bezier(0, 0, 0.2, 1);
-            padding: 28px 16px;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            overflow-y: auto;
-        }
-
-        .sidebar.open {
-            left: 0;
-        }
-
-        .menu-btn {
-            background: #1c1c1e;
-            color: #ffffff;
-            border: 1px solid #333333;
-            padding: 12px;
-            border-radius: 12px;
-            font-size: 13px;
-            text-align: left;
-            cursor: pointer;
-            word-wrap: break-word;
-            font-weight: 500;
-        }
-
-        .menu-btn-new {
-            background: #0055ff;
-            border: none;
-            text-align: center;
-            font-weight: bold;
-            color: white;
-        }
-
-        .close-menu-btn {
-            background: transparent;
-            border: none;
-            color: #ff5555;
-            text-align: center;
-            font-size: 13px;
-            margin-top: auto;
-            padding: 10px;
-        }
-
-        /* Reglas para elementos Markdown renderizados */
-        .ai-message strong {
-            color: #ffffff;
-            font-weight: bold;
-        }
-
-        .ai-message em {
-            font-style: italic;
-        }
-
-        .ai-message code {
-            background: #2c2c2e;
-            padding: 2px 4px;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 11px;
-            color: #ff453a;
-        }
-
-        .ai-message ul {
-            margin-left: 16px;
-            margin-top: 4px;
-            margin-bottom: 4px;
-        }
-
-        .ai-message li {
-            margin-bottom: 2px;
-        }
-
-        .ai-message h1,
-        .ai-message h2,
-        .ai-message h3 {
-            font-size: 14px;
-            margin-top: 6px;
-            margin-bottom: 2px;
-            color: #00ffcc;
-        }
-
-        .ai-message blockquote {
-            margin: 8px 0;
-            padding-left: 10px;
-            border-left: 3px solid #00ffcc;
-            color: #aaaaaa;
-            font-style: italic;
-        }
-
-        .ai-message hr {
-            border: 0;
-            border-top: 1px solid #333333;
-            margin: 12px 0;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>GW4 Gemini UI</title>
+<style>
+/* Estilos base optimizados para AMOLED (Negro Puro #000) */
+* {
+box-sizing: border-box;
+margin: 0;
+padding: 0;
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+-webkit-tap-highlight-color: transparent;
+}
+body {
+background-color: #000000;
+color: #ffffff;
+overflow-x: hidden;
+}
+/* Contenedor principal */
+.chat-container {
+display: flex;
+flex-direction: column;
+min-height: 100vh;
+padding: 24px 8px 60px 8px;
+}
+/* Cabecera fija */
+.chat-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 6px 12px;
+background-color: #000000;
+border-bottom: 1px solid #1a1a1a;
+position: sticky;
+top: 0;
+z-index: 100;
+}
+.chat-header-title {
+cursor: pointer;
+text-decoration: underline;
+color: #00ffcc;
+font-size: 13px;
+font-weight: bold;
+}
+.model-badge {
+font-size: 10px;
+background: #1c1c1e;
+padding: 2px 6px;
+border-radius: 8px;
+color: #aaaaaa;
+border: 1px solid #333333;
+}
+/* Zona de Mensajes */
+.chat-box {
+flex: 1;
+display: flex;
+flex-direction: column;
+gap: 10px;
+padding: 12px 4px;
+}
+.message {
+max-width: 90%;
+padding: 8px 12px;
+border-radius: 14px;
+font-size: 13px;
+line-height: 1.4;
+word-wrap: break-word;
+}
+.user-message {
+background-color: #1c1c1e;
+color: #ffffff;
+align-self: flex-end;
+border-bottom-right-radius: 2px;
+}
+.ai-message {
+background-color: #0a0a0a;
+color: #e5e5e7;
+align-self: flex-start;
+border-bottom-left-radius: 2px;
+border: 1px solid #1a1a1a;
+}
+.system-message {
+max-width: 100%;
+background: #1e1b4b;
+color: #a5b4fc;
+border: 1px solid #3730a3;
+align-self: center;
+text-align: center;
+font-size: 11px;
+}
+/* Caja de entrada de texto inferior */
+.input-group {
+position: fixed;
+bottom: 0;
+left: 0;
+width: 100%;
+background: #000000;
+padding: 6px 8px;
+display: flex;
+gap: 6px;
+border-top: 1px solid #1a1a1a;
+z-index: 100;
+}
+.input-group input {
+flex: 1;
+background: #1c1c1e;
+border: 1px solid #333333;
+color: white;
+padding: 8px 12px;
+border-radius: 20px;
+font-size: 13px;
+outline: none;
+}
+.send-btn {
+background: #00ffcc;
+border: none;
+width: 34px;
+height: 34px;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+cursor: pointer;
+}
+.send-btn svg {
+width: 16px;
+height: 16px;
+fill: #000000;
+}
+/* MENÚ LATERAL DESPLEGABLE (100% PANTALLA) */
+.sidebar {
+position: fixed;
+top: 0;
+left: -100%;
+width: 100vw;
+height: 100vh;
+background-color: #000000;
+z-index: 200;
+transition: left 0.2s cubic-bezier(0, 0, 0.2, 1);
+padding: 28px 16px;
+box-sizing: border-box;
+display: flex;
+flex-direction: column;
+gap: 12px;
+overflow-y: auto;
+}
+.sidebar.open {
+left: 0;
+}
+.menu-btn {
+background: #1c1c1e;
+color: #ffffff;
+border: 1px solid #333333;
+padding: 12px;
+border-radius: 12px;
+font-size: 13px;
+text-align: left;
+cursor: pointer;
+word-wrap: break-word;
+font-weight: 500;
+}
+.menu-btn-new {
+background: #0055ff;
+border: none;
+text-align: center;
+font-weight: bold;
+color: white;
+}
+.close-menu-btn {
+background: transparent;
+border: none;
+color: #ff5555;
+text-align: center;
+font-size: 13px;
+margin-top: auto;
+padding: 10px;
+}
+/* Reglas para elementos Markdown renderizados */
+.ai-message strong {
+color: #ffffff;
+font-weight: bold;
+}
+.ai-message em {
+font-style: italic;
+}
+.ai-message code {
+background: #2c2c2e;
+padding: 2px 4px;
+border-radius: 4px;
+font-family: monospace;
+font-size: 11px;
+color: #ff453a;
+}
+.ai-message ul {
+margin-left: 16px;
+margin-top: 4px;
+margin-bottom: 4px;
+}
+.ai-message li {
+margin-bottom: 2px;
+}
+.ai-message h1,
+.ai-message h2,
+.ai-message h3 {
+font-size: 14px;
+margin-top: 6px;
+margin-bottom: 2px;
+color: #00ffcc;
+}
+.ai-message blockquote {
+margin: 8px 0;
+padding-left: 10px;
+border-left: 3px solid #00ffcc;
+color: #aaaaaa;
+font-style: italic;
+}
+.ai-message hr {
+border: 0;
+border-top: 1px solid #333333;
+margin: 12px 0;
+}
+</style>
 </head>
-
 <body>
-
-    <div id="sidebarMenu" class="sidebar">
-        <button class="menu-btn menu-btn-new" onclick="createNewChat()">➕ Nuevo Chat</button>
-        <div id="chatsList" style="display: flex; flex-direction: column; gap: 8px;"></div>
-        <button class="close-menu-btn" onclick="toggleMenu()">❌ Cerrar Menú</button>
-    </div>
-
-    <div class="chat-container">
-        <div class="chat-header">
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <span onclick="toggleMenu()" style="cursor: pointer; font-size: 18px; color: #00ffcc; padding-right: 4px;">☰</span>
-                <span class="chat-header-title" onclick="editSystemPrompt()">⚙️ IA</span>
-            </div>
-            <span id="modelIndicator" class="model-badge">⚡ Flash</span>
-        </div>
-
-        <div class="chat-box" id="chatBox"></div>
-
-        <div class="input-group">
-            <input type="text" id="userInput" placeholder="Escribe..." onkeypress="handleKeyPress(event)">
-            <button class="send-btn" onclick="sendMessage()">
-        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-      </button>
-        </div>
-    </div>
-
-    <script>
+<div id="sidebarMenu" class="sidebar">
+<button class="menu-btn menu-btn-new" onclick="createNewChat()">➕ Nuevo Chat</button>
+<div id="chatsList" style="display: flex; flex-direction: column; gap: 8px;"></div>
+<button class="close-menu-btn" onclick="toggleMenu()">❌ Cerrar Menú</button>
+</div>
+<div class="chat-container">
+<div class="chat-header">
+<div style="display: flex; align-items: center; gap: 8px;">
+<span onclick="toggleMenu()" style="cursor: pointer; font-size: 18px; color: #00ffcc; padding-right: 4px;">☰</span>
+<span class="chat-header-title" onclick="editSystemPrompt()">⚙️ IA</span>
+</div>
+<span id="modelIndicator" class="model-badge">⚡ Flash 2.5</span>
+</div>
+<div class="chat-box" id="chatBox"></div>
+<div class="input-group">
+<input type="text" id="userInput" placeholder="Escribe..." onkeypress="handleKeyPress(event)">
+<button class="send-btn" onclick="sendMessage()">
+<svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+</button>
+</div>
+</div>
+<script>
 // CONFIGURACIÓN PARA OPENROUTER (Gemini 2.5 Flash Sin Límites)
 let API_KEY = localStorage.getItem("gw4_api_key") || "";
-const currentModel = "google/gemini-2.5-flash"; // El modelo inteligente de Google
+const currentModel = "google/gemini-2.5-flash";
 
-    // Variables de Estado y Persistencia Multi-Chat
-    let currentSystemPrompt = "Eres un asistente personal ultra-directo, útil y conciso. Responde siempre en español. Usa párrafos muy extensos, profundiza en el tema, usa negritas y viñetas para que se lea bien en un reloj inteligente de 1.4 pulgadas. Proiridad de markdown: `#` y `##`, usa mas ** que cursiva o ambos. Proiridad: listas ordenadas. Las etiquetas HTML estan permitidas, puedes usar <br>, etc... **ESTRICTAMENTE PROHIBIDO:** Usar <script>, <style>, sin ```html, por favor, ```html no ejecutara codigo plano. si escribes Hola! <br> ¿En que..., si, las etiquetas funcionaran. No puedes usar <style>, pero **sí** <p style='color: blue'>Este texto esta en azul</p>.";
-    let chatsData = JSON.parse(localStorage.getItem("gw4_multichats")) || {};
-    let currentChatId = localStorage.getItem("gw4_current_chat_id") || null;
-    let chatHistory = [];
+// Variables de Estado y Persistencia Multi-Chat
+let currentSystemPrompt = "Eres un asistente personal ultra-directo, útil y conciso. Responde siempre en español. Usa párrafos muy extensos, profundiza en el tema, usa negritas y viñetas para que se lea bien en un reloj inteligente de 1.4 pulgadas. Proiridad de markdown: `#` y `##`, usa mas ** que cursiva o ambos. Proiridad: listas ordenadas. Las etiquetas HTML estan permitidas, puedes usar <br>, etc... **ESTRICTAMENTE PROHIBIDO:** Usar <script>, <style>, sin ```html, por favor, ```html no ejecutara codigo plano. si escribes Hola! <br> ¿En que..., si, las etiquetas funcionaran. No puedes usar <style>, pero **sí** <p style='color: blue'>Este texto esta en azul</p>.";
+let chatsData = JSON.parse(localStorage.getItem("gw4_multichats")) || {};
+let currentChatId = localStorage.getItem("gw4_current_chat_id") || null;
+let chatHistory = [];
 
-// 1. EL TOGGLE SOLO ABRE Y CIERRA (Sin meterse en bucles)
 function toggleMenu() {
-  const menu = document.getElementById("sidebarMenu");
-  menu.classList.toggle("open");
-  if (menu.classList.contains("open")) {
-    renderChatsList();
-  }
+const menu = document.getElementById("sidebarMenu");
+menu.classList.toggle("open");
+if (menu.classList.contains("open")) {
+renderChatsList();
+}
 }
 
-    function renderChatsList() {
-      const listContainer = document.getElementById("chatsList");
-      listContainer.innerHTML = "";
-      
-      Object.keys(chatsData).forEach(id => {
-        const chat = chatsData[id];
-        const btn = document.createElement("button");
-        btn.className = "menu-btn";
-        if (id === currentChatId) btn.style.borderColor = "#00ffcc";
-        btn.innerText = chat.title || "Chat vacío";
-        btn.onclick = () => loadChat(id);
-        listContainer.appendChild(btn);
-      });
-    }
+function renderChatsList() {
+const listContainer = document.getElementById("chatsList");
+listContainer.innerHTML = "";
 
-// 2. EL LOAD CHAT SOLO CARGA DATOS (Y cierra el menú a capón)
+Object.keys(chatsData).forEach(id => {
+const chat = chatsData[id];
+const btn = document.createElement("button");
+btn.className = "menu-btn";
+if (id === currentChatId) btn.style.borderColor = "#00ffcc";
+btn.innerText = chat.title || "Chat vacío";
+btn.onclick = () => loadChat(id);
+listContainer.appendChild(btn);
+});
+}
+
 function loadChat(id) {
-  currentChatId = id;
-  localStorage.setItem("gw4_current_chat_id", id);
-  chatHistory = chatsData[id].history || [];
-  
-  const chatBox = document.getElementById("chatBox");
-  chatBox.innerHTML = "";
-  
-  if (chatHistory.length === 0) {
-    chatBox.innerHTML = `<div class="message ai-message">¡Nuevo chat iniciado! ¿En qué te ayudo?</div>`;
-  } else {
-    chatHistory.forEach(msg => {
-      const roleClass = msg.role === "user" ? "user-message" : "ai-message";
-      const content = msg.role === "user" ? msg.parts[0].text : parseMarkdown(msg.parts[0].text);
-      chatBox.innerHTML += `<div class="message ${roleClass}">${content}</div>`;
-    });
-  }
-  
-  // Forzamos el cierre del menú quitando la clase directamente, SIN pasar por toggleMenu
-  document.getElementById("sidebarMenu").classList.remove("open");
-  
-  setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 50);
+currentChatId = id;
+localStorage.setItem("gw4_current_chat_id", id);
+chatHistory = chatsData[id].history || [];
+
+const chatBox = document.getElementById("chatBox");
+chatBox.innerHTML = "";
+
+if (chatHistory.length === 0) {
+chatBox.innerHTML = `<div class="message ai-message">¡Nuevo chat iniciado! ¿En qué te ayudo?</div>`;
+} else {
+chatHistory.forEach(msg => {
+const roleClass = msg.role === "user" ? "user-message" : "ai-message";
+const content = msg.role === "user" ? msg.content : parseMarkdown(msg.content);
+chatBox.innerHTML += `<div class="message ${roleClass}">${content}</div>`;
+});
 }
 
-    function createNewChat() {
-      const newId = "chat_" + Date.now();
-      chatsData[newId] = { title: "Nuevo Chat 📝", history: [] };
-      saveToLocalStorage();
-      loadChat(newId);
-    }
+document.getElementById("sidebarMenu").classList.remove("open");
+setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 50);
+}
 
-    function saveToLocalStorage() {
-      localStorage.setItem("gw4_multichats", JSON.stringify(chatsData));
-    }
+function createNewChat() {
+const newId = "chat_" + Date.now();
+chatsData[newId] = { title: "Nuevo Chat 📝", history: [] };
+saveToLocalStorage();
+loadChat(newId);
+}
 
-    // Cambiador del System Prompt Libre
-    function editSystemPrompt() {
-      const customPrompt = prompt("Instrucciones de la IA:", currentSystemPrompt);
-      if (customPrompt !== null && customPrompt.trim() !== "") {
-        currentSystemPrompt = customPrompt.trim();
-        document.getElementById("chatBox").innerHTML += `<div class="message system-message">⚙️ Prompt personalizado aplicado.</div>`;
-        window.scrollTo(0, document.body.scrollHeight);
-      }
-    }
+function saveToLocalStorage() {
+localStorage.setItem("gw4_multichats", JSON.stringify(chatsData));
+}
 
-    // Controladores de Envío de Mensajes
-    function handleKeyPress(event) {
-      if (event.key === "Enter") sendMessage();
-    }
+function editSystemPrompt() {
+const customPrompt = prompt("Instrucciones de la IA:", currentSystemPrompt);
+if (customPrompt !== null && customPrompt.trim() !== "") {
+currentSystemPrompt = customPrompt.trim();
+document.getElementById("chatBox").innerHTML += `<div class="message system-message">⚙️ Prompt personalizado aplicado.</div>`;
+window.scrollTo(0, document.body.scrollHeight);
+}
+}
+
+function handleKeyPress(event) {
+if (event.key === "Enter") sendMessage();
+}
 
 async function sendMessage() {
-  const inputField = document.getElementById("userInput");
-  const userText = inputField.value.trim();
-  if (!userText) return;
+const inputField = document.getElementById("userInput");
+const userText = inputField.value.trim();
+if (!userText) return;
 
-  const chatBox = document.getElementById("chatBox");
+const chatBox = document.getElementById("chatBox");
 
-  // COMANDO SECRETO PARA GUARDAR LA KEY EN EL RELOJ
-  if (userText.startsWith('/key ')) {
-    const nuevaKey = userText.substring(5).trim();
-    localStorage.setItem("gw4_api_key", nuevaKey);
-    API_KEY = nuevaKey;
-    chatBox.innerHTML += `<div class="message system-message" style="background:#112211; color:#00ffcc;">🔑 ¡Clave de OpenRouter guardada!</div>`;
-    inputField.value = "";
-    return;
-  }
-
-  // Pintar mensaje del usuario
-  chatBox.innerHTML += `<div class="message user-message">${userText}</div>`;
-  inputField.value = "";
-  window.scrollTo(0, document.body.scrollHeight);
-
-  if (!API_KEY) {
-    chatBox.innerHTML += `<div class="message ai-message" style="color:#ff5555;">❌ Configura tu clave con /key sk-or-v1...</div>`;
-    return;
-  }
-
-  // Guardar en historial interno
-  chatHistory.push({ role: "user", content: userText });
-
-  try {
-    // URL universal de OpenRouter
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${API_KEY}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": "https://github.com", // Obligatorio para OpenRouter
-        "X-Title": "Galaxy Watch Chat"
-      },
-      body: JSON.stringify({
-        model: currentModel,
-        messages: chatHistory.map(msg => ({ role: msg.role, content: msg.content }))
-      })
-    });
-
-    const data = await response.json();
-    
-    if (data.choices && data.choices[0]) {
-      const aiReply = data.choices[0].message.content;
-      chatHistory.push({ role: "assistant", content: aiReply });
-      
-      // Mostrar respuesta parseada
-      chatBox.innerHTML += `<div class="message ai-message">${parseMarkdown(aiReply)}</div>`;
-    } else {
-      chatBox.innerHTML += `<div class="message ai-message" style="color:#ff5555;">❌ Error API: ${data.error ? data.error.message : 'Respuesta vacía'}</div>`;
-    }
-  } catch (error) {
-    chatBox.innerHTML += `<div class="message ai-message" style="color:#ff5555;">❌ Error de conexión.</div>`;
-  }
-
-  window.scrollTo(0, document.body.scrollHeight);
+// Comando invisible para borrar todo el almacenamiento local
+if (userText.toLowerCase() === '/clear') {
+localStorage.clear();
+chatsData = {};
+inputField.value = "";
+createNewChat();
+return;
 }
-      
-      // Comando invisible para borrar todo el almacenamiento local
-      if (userText.toLowerCase() === '/clear') {
-        localStorage.clear();
-        chatsData = {};
-        inputField.value = "";
-        createNewChat();
-        return;
-      }
 
-      chatBox.innerHTML += `<div class="message user-message">${userText}</div>`;
-      inputField.value = "";
-      window.scrollTo(0, document.body.scrollHeight);
-      
-      chatHistory.push({ role: "user", parts: [{ text: userText }] });
-      
-      // Renombrar el título dinámicamente con el primer mensaje
-      if (chatsData[currentChatId].title === "Nuevo Chat 📝") {
-        chatsData[currentChatId].title = userText.substring(0, 15) + (userText.length > 15 ? "..." : "");
-      }
-      
-      chatsData[currentChatId].history = chatHistory;
-      saveToLocalStorage();
-      
-      await requestAIResponse();
-    }
+// COMANDO SECRETO PARA GUARDAR LA KEY EN EL RELOJ
+if (userText.startsWith('/key ')) {
+const nuevaKey = userText.substring(5).trim();
+localStorage.setItem("gw4_api_key", nuevaKey);
+API_KEY = nuevaKey;
+chatBox.innerHTML += `<div class="message system-message" style="background:#112211; color:#00ffcc;">🔑 ¡Clave de OpenRouter guardada!</div>`;
+inputField.value = "";
+return;
+}
 
-    // Petición HTTP a la API de Gemini
-    async function requestAIResponse() {
-      const chatBox = document.getElementById("chatBox");
-      
-      // Indicador de carga súper minimalista
-      const loadingDiv = document.createElement("div");
-      loadingDiv.className = "message ai-message";
-      loadingDiv.id = "loadingIndicator";
-      loadingDiv.innerText = "Pensando...";
-      chatBox.appendChild(loadingDiv);
-      window.scrollTo(0, document.body.scrollHeight);
+// Pintar mensaje del usuario
+chatBox.innerHTML += `<div class="message user-message">${userText}</div>`;
+inputField.value = "";
+window.scrollTo(0, document.body.scrollHeight);
 
-      try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${API_KEY}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: chatHistory,
-            systemInstruction: { parts: [{ text: currentSystemPrompt }] }
-          })
-        });
+if (!API_KEY) {
+chatBox.innerHTML += `<div class="message ai-message" style="color:#ff5555;">❌ Configura tu clave con /key sk-or-v1...</div>`;
+return;
+}
 
-        document.getElementById("loadingIndicator").remove();
+// Renombrar el título dinámicamente con el primer mensaje
+if (chatsData[currentChatId].title === "Nuevo Chat 📝") {
+chatsData[currentChatId].title = userText.substring(0, 15) + (userText.length > 15 ? "..." : "");
+}
 
-        if (response.ok) {
-          const data = await response.json();
-          let aiResponse = data.candidates[0].content.parts[0].text;
-          
-          // Escudo protector anti-bucle repetitivo
-          const frases = aiResponse.split(/[.:\n]/);
-          for (let f of frases) {
-            let cleanF = f.trim();
-            if (cleanF.length > 15 && aiResponse.split(cleanF).length > 3) {
-              aiResponse = cleanF + ". *[Bucle de texto mitigado]*";
-              break;
-            }
-          }
-          
-          const formattedResponse = parseMarkdown(aiResponse);
-          chatBox.innerHTML += `<div class="message ai-message">${formattedResponse}</div>`;
-          
-          chatHistory.push({ role: "model", parts: [{ text: aiResponse }] });
-          chatsData[currentChatId].history = chatHistory;
-          saveToLocalStorage();
-        } else {
-          chatBox.innerHTML += `<div class="message ai-message" style="color:#ff453a;">Error de API. Revisa tu Key.</div>`;
-        }
-      } catch (error) {
-        if(document.getElementById("loadingIndicator")) document.getElementById("loadingIndicator").remove();
-        chatBox.innerHTML += `<div class="message ai-message" style="color:#ff453a;">Error de conexión.</div>`;
-      }
-      window.scrollTo(0, document.body.scrollHeight);
-    }
+// Guardar en historial interno con formato OpenRouter (OpenAI standard)
+chatHistory.push({ role: "user", content: userText });
+chatsData[currentChatId].history = chatHistory;
+saveToLocalStorage();
 
-    // Parser manual ultra fluido de Markdown corregido
-    function parseMarkdown(text) {
-      const lines = text.split('\n');
-      let htmlResult = [];
-      let inList = false;
+// Crear indicador de carga minimalista
+const loadingDiv = document.createElement("div");
+loadingDiv.className = "message ai-message";
+loadingDiv.id = "loadingIndicator";
+loadingDiv.innerText = "Pensando...";
+chatBox.appendChild(loadingDiv);
+window.scrollTo(0, document.body.scrollHeight);
 
-      lines.forEach(line => {
-        let cleanLine = line.trim();
+try {
+// Generar el array de mensajes incluyendo las instrucciones de sistema
+const formattedMessages = [
+{ role: "system", content: currentSystemPrompt },
+...chatHistory
+];
 
-        // 1. Líneas horizontales (--- o ***)
-        if (cleanLine === '---' || cleanLine === '***') {
-          if (inList) { htmlResult.push('</ul>'); inList = false; }
-          htmlResult.push('<hr>');
-          return;
-        }
+const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+method: "POST",
+headers: {
+"Authorization": `Bearer ${API_KEY}`,
+"Content-Type": "application/json",
+"HTTP-Referer": "https://github.com",
+"X-Title": "Galaxy Watch Chat"
+},
+body: JSON.stringify({
+model: currentModel,
+messages: formattedMessages
+})
+});
 
-        // 2. Citas en bloque (> texto)
-        if (cleanLine.startsWith('> ')) {
-          if (inList) { htmlResult.push('</ul>'); inList = false; }
-          htmlResult.push(`<blockquote>${formatInlineMarkdown(cleanLine.substring(2))}</blockquote>`);
-          return;
-        }
+if (document.getElementById("loadingIndicator")) document.getElementById("loadingIndicator").remove();
 
-        // 3. Títulos (Headers)
-        if (cleanLine.startsWith('# ')) {
-          if (inList) { htmlResult.push('</ul>'); inList = false; }
-          htmlResult.push(`<h1>${formatInlineMarkdown(cleanLine.substring(2))}</h1>`);
-          return;
-        }
-        if (cleanLine.startsWith('## ')) {
-          if (inList) { htmlResult.push('</ul>'); inList = false; }
-          htmlResult.push(`<h2>${formatInlineMarkdown(cleanLine.substring(3))}</h2>`);
-          return;
-        }
-        if (cleanLine.startsWith('### ')) {
-          if (inList) { htmlResult.push('</ul>'); inList = false; }
-          htmlResult.push(`<h3>${formatInlineMarkdown(cleanLine.substring(4))}</h3>`);
-          return;
-        }
+if (response.ok) {
+const data = await response.json();
+if (data.choices && data.choices[0]) {
+let aiReply = data.choices[0].message.content;
 
-        // 4. Listas ordenadas/no ordenadas
-        if (cleanLine.startsWith('* ') || cleanLine.startsWith('- ')) {
-          if (!inList) { htmlResult.push('<ul>'); inList = true; }
-          htmlResult.push(`<li>${formatInlineMarkdown(cleanLine.substring(2))}</li>`);
-          return;
-        }
+// Escudo protector anti-bucle repetitivo
+const frases = aiReply.split(/[.:\n]/);
+for (let f of frases) {
+let cleanF = f.trim();
+if (cleanF.length > 15 && aiReply.split(cleanF).length > 3) {
+aiReply = cleanF + ". *[Bucle de texto mitigado]*";
+break;
+}
+}
 
-        // Cerrar listas si la línea es un párrafo normal
-        if (cleanLine === '') {
-          if (inList) { htmlResult.push('</ul>'); inList = false; }
-          return;
-        }
+chatBox.innerHTML += `<div class="message ai-message">${parseMarkdown(aiReply)}</div>`;
 
-        if (inList) { htmlResult.push('</ul>'); inList = false; }
-        htmlResult.push(`<p>${formatInlineMarkdown(line)}</p>`);
-      });
+chatHistory.push({ role: "assistant", content: aiReply });
+chatsData[currentChatId].history = chatHistory;
+saveToLocalStorage();
+} else {
+chatBox.innerHTML += `<div class="message ai-message" style="color:#ff5555;">❌ Respuesta vacía de OpenRouter.</div>`;
+}
+} else {
+const errorData = await response.json();
+chatBox.innerHTML += `<div class="message ai-message" style="color:#ff453a;">Error de API: ${errorData.error ? errorData.error.message : 'Revisa tu Key.'}</div>`;
+}
+} catch (error) {
+if (document.getElementById("loadingIndicator")) document.getElementById("loadingIndicator").remove();
+chatBox.innerHTML += `<div class="message ai-message" style="color:#ff453a;">Error de conexión.</div>`;
+}
+window.scrollTo(0, document.body.scrollHeight);
+}
 
-      if (inList) htmlResult.push('</ul>');
-      return htmlResult.join('');
-    }
+// Parser manual ultra fluido de Markdown corregido
+function parseMarkdown(text) {
+const lines = text.split('\n');
+let htmlResult = [];
+let inList = false;
 
-    // Formateador en línea (Regex ordenados: 3 ast -> 2 ast -> 1 ast)
-    function formatInlineMarkdown(text) {
-      let formatted = text;
-      
-      // Código en línea y tachado
-      formatted = formatted.replace(/`(.*?)`/g, '<code>$1</code>');
-      formatted = formatted.replace(/~~(.*?)~~/g, '<del>$1</del>');
-      
-      // Negrita + Cursiva (***)
-      formatted = formatted.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
-      formatted = formatted.replace(/___(.*?)___/g, '<strong><em>$1</em></strong>');
-      
-      // Negrita pura (**)
-      formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      formatted = formatted.replace(/__(.*?)__/g, '<strong>$1</strong>');
-      
-      // Cursiva pura (*)
-      formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
-      formatted = formatted.replace(/_(.*?)_/g, '<em>$1</em>');
-      
-      return formatted;
-    }
+lines.forEach(line => {
+let cleanLine = line.trim();
 
-    // Inicialización del Chat actual de la base de datos local
-    if (!currentChatId || !chatsData[currentChatId]) {
-      createNewChat();
-    } else {
-      loadChat(currentChatId);
-    }
-    </script>
+if (cleanLine === '---' || cleanLine === '***') {
+if (inList) { htmlResult.push('</ul>'); inList = false; }
+htmlResult.push('<hr>');
+return;
+}
+
+if (cleanLine.startsWith('> ')) {
+if (inList) { htmlResult.push('</ul>'); inList = false; }
+htmlResult.push(`<blockquote>${formatInlineMarkdown(cleanLine.substring(2))}</blockquote>`);
+return;
+}
+
+if (cleanLine.startsWith('# ')) {
+if (inList) { htmlResult.push('</ul>'); inList = false; }
+htmlResult.push(`<h1>${formatInlineMarkdown(cleanLine.substring(2))}</h1>`);
+return;
+}
+if (cleanLine.startsWith('## ')) {
+if (inList) { htmlResult.push('</ul>'); inList = false; }
+htmlResult.push(`<h2>${formatInlineMarkdown(cleanLine.substring(3))}</h2>`);
+return;
+}
+if (cleanLine.startsWith('### ')) {
+if (inList) { htmlResult.push('</ul>'); inList = false; }
+htmlResult.push(`<h3>${formatInlineMarkdown(cleanLine.substring(4))}</h3>`);
+return;
+}
+
+if (cleanLine.startsWith('* ') || cleanLine.startsWith('- ')) {
+if (!inList) { htmlResult.push('<ul>'); inList = true; }
+htmlResult.push(`<li>${formatInlineMarkdown(cleanLine.substring(2))}</li>`);
+return;
+}
+
+if (cleanLine === '') {
+if (inList) { htmlResult.push('</ul>'); inList = false; }
+return;
+}
+
+if (inList) { htmlResult.push('</ul>'); inList = false; }
+htmlResult.push(`<p>${formatInlineMarkdown(line)}</p>`);
+});
+
+if (inList) htmlResult.push('</ul>');
+return htmlResult.join('');
+}
+
+function formatInlineMarkdown(text) {
+let formatted = text;
+formatted = formatted.replace(/`(.*?)`/g, '<code>$1</code>');
+formatted = formatted.replace(/~~(.*?)~~/g, '<del>$1</del>');
+formatted = formatted.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
+formatted = formatted.replace(/___(.*?)___/g, '<strong><em>$1</em></strong>');
+formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+formatted = formatted.replace(/__(.*?)__/g, '<strong>$1</strong>');
+formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
+formatted = formatted.replace(/_(.*?)_/g, '<em>$1</em>');
+return formatted;
+}
+
+// Inicialización del Chat actual de la base de datos local
+if (!currentChatId || !chatsData[currentChatId]) {
+createNewChat();
+} else {
+loadChat(currentChatId);
+}
+</script>
 </body>
-
 </html>
