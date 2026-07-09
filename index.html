@@ -5,166 +5,143 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-            background-color: #f7f9fa;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .chat-container {
-            width: 450px;
-            height: 520px;
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            border: 1px solid #e1e8ed;
-            transition: all 0.2s ease; /* Transición suave por si acaso */
-        }
-        /* Cabecera del Chivato Visual */
-        .chat-header {
-            background: #f8f9fa;
-            padding: 12px 20px;
-            border-bottom: 1px solid #e1e8ed;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .chat-header-title {
-            font-weight: bold;
-            color: #14171a;
-            font-size: 16px;
-        }
-        .model-badge {
-            font-size: 11px;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-        .chat-box {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .message {
-            max-width: 75%;
-            padding: 12px 16px;
-            font-size: 15px;
-            line-height: 1.4;
-        }
-        .user-message {
-            background-color: #3b82f6;
-            color: #ffffff;
-            align-self: flex-end;
-            border-radius: 16px 16px 4px 16px;
-        }
-        .ai-message {
-            background-color: #f1f3f4;
-            color: #14171a;
-            align-self: flex-start;
-            border-radius: 16px 16px 16px 4px;
-        }
-        .system-message {
-            background-color: #fee2e2;
-            color: #ef4444;
-            align-self: center;
-            border-radius: 8px;
-            font-size: 13px;
-            padding: 8px 12px;
-        }
-        .input-group {
-            padding: 15px;
-            border-top: 1px solid #e1e8ed;
-            display: flex;
-            gap: 10px;
-        }
-        input[type="text"] {
-            flex: 1;
-            padding: 12px 15px;
-            border: 1px solid #e1e8ed;
-            border-radius: 24px;
-            outline: none;
-        }
-        .send-btn {
-            background-color: #3b82f6;
-            border: none;
-            border-radius: 50%;
-            width: 42px;
-            height: 42px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-        }
-        .send-btn svg {
-            width: 18px;
-            height: 18px;
-            fill: white;
-            transform: rotate(45deg);
-            margin-left: -2px;
-            margin-top: 2px;
-        }
+body {
+ font-family: system-ui, -apple-system, sans-serif;
+ background-color: #000000; /* Negro puro para ahorrar batería AMOLED */
+ color: #ffffff;
+ margin: 0;
+ display: block; /* Fuera flexbox global para mejorar el rendimiento del scroll */
+ padding: 20px 8px 70px 8px; /* Margen para que no se corte en pantalla redonda */
+ }
+ .chat-container {
+ width: 100%;
+ display: block;
+ box-shadow: none !important; /* Fuera sombras, causan lag de renderizado */
+ border: none !important;
+ }
+ /* Cabecera adaptada a modo oscuro */
+ .chat-header {
+ background: #111111;
+ padding: 10px 15px;
+ border-bottom: 1px solid #222222;
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ }
+ .chat-header-title {
+ font-weight: bold;
+ color: #ffffff;
+ font-size: 14px;
+ }
+ .model-badge {
+ font-size: 11px;
+ padding: 3px 8px;
+ border-radius: 8px;
+ font-weight: bold;
+ }
+ .chat-box {
+ display: flex;
+ flex-direction: column;
+ gap: 10px;
+ margin-bottom: 15px;
+ }
+ .message {
+ max-width: 85%; /* Un poco más ancho para la micropantalla */
+ padding: 10px 14px;
+ font-size: 14px;
+ line-height: 1.3;
+ }
+ .user-message {
+ background-color: #0055ff; /* Azul vibrante pero oscuro */
+ color: #ffffff;
+ align-self: flex-end;
+ border-radius: 12px 12px 2px 12px;
+ }
+ .ai-message {
+ background-color: #1c1c1e; /* Gris oscuro de fondo para la IA */
+ color: #ffffff;
+ align-self: flex-start;
+ border-radius: 12px 12px 12px 2px;
+ }
+ .system-message {
+ background-color: #551111; /* Rojo oscuro de advertencia */
+ color: #ff5555;
+ align-self: center;
+ border-radius: 6px;
+ font-size: 12px;
+ padding: 6px 10px;
+ }
+ .input-group {
+ position: fixed; /* Se queda fijo abajo */
+ bottom: 0;
+ left: 0;
+ right: 0;
+ background: #000000;
+ padding: 10px;
+ border-top: 1px solid #222222;
+ display: flex;
+ gap: 8px;
+ z-index: 100;
+ }
+ input[type="text"] {
+ flex: 1;
+ padding: 10px 12px;
+ border: 1px solid #333333;
+ background: #111111;
+ color: #ffffff;
+ border-radius: 20px;
+ outline: none;
+ font-size: 14px;
+ }
+ .send-btn {
+ background-color: #0055ff;
+ border: none;
+ border-radius: 50%;
+ width: 38px;
+ height: 38px;
+ display: flex;
+ justify-content: center;
+ align-items: center;
+ }
+ .send-btn svg {
+ width: 16px;
+ height: 16px;
+ fill: white;
+ transform: rotate(45deg);
+ }
+ 
+ /* 🌐 ELIMINAMOS BORDER-RADIUS Y TRUCOS EMBED RAROS */
+ body.embed-mode {
+ background-color: #000000;
+ }
+ body.embed-mode .chat-container {
+ width: 100vw !important;
+ height: auto !important;
+ max-width: 100% !important;
+ }
 
-        /* 🌐 ESTILOS ADAPTATIVOS PARA EL MODO EMBED (?embed) */
-        body.embed-mode {
-            background-color: #ffffff;
-        }
-        body.embed-mode .chat-container {
-            width: 100vw !important;
-            height: 100vh !important;
-            max-width: 100% !important;
-            max-height: 100% !important;
-            border-radius: 0 !important;
-            box-shadow: none !important;
-            border: none !important;
-        }
-
-        /* RENDERIZADO AVANZADO DE MARKDOWN */
-        .ai-message p { margin: 0 0 8px 0; }
-        .ai-message p:last-child { margin-bottom: 0; }
-        .ai-message ul { margin: 4px 0; padding-left: 20px; list-style-type: disc; }
-        .ai-message li { margin-bottom: 4px; }
-       
-        .ai-message h1, .ai-message h2, .ai-message h3,
-        .ai-message h4, .ai-message h5, .ai-message h6 {
-            margin: 12px 0 6px 0;
-            font-weight: bold;
-            line-height: 1.2;
-        }
-        .ai-message h1 { font-size: 1.35em; border-bottom: 1px solid #e1e8ed; padding-bottom: 4px; }
-        .ai-message h2 { font-size: 1.25em; }
-        .ai-message h3 { font-size: 1.15em; }
-        .ai-message h4 { font-size: 1.05em; }
-        .ai-message h5 { font-size: 0.95em; }
-        .ai-message h6 { font-size: 0.85em; color: #657786; }
-
-        .ai-message code { font-family: "SFMono-Regular", Consolas, monospace; background-color: rgba(27,31,35,0.08); color: #c7254e; padding: 2px 4px; border-radius: 4px; font-size: 0.9em; }
-        .ai-message .chat-link { color: #2563eb; text-decoration: underline; font-weight: 500; }
-        .ai-message .chat-link:hover { color: #1d4ed8; }
-        .ai-message .chat-img { max-width: 100%; height: auto; border-radius: 8px; margin: 6px 0; display: block; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-
-        .code-block-container { margin: 10px 0; border-radius: 8px; overflow: hidden; border: 1px solid #2d2d2d; background-color: #1e1e1e; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
-        .code-block-header { background-color: #2d2d2d; padding: 8px 14px; display: flex; justify-content: space-between; align-items: center; color: #dcdcdc; font-size: 12px; font-weight: 600; border-bottom: 1px solid #1e1e1e; }
-        .copy-code-btn { background: none; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center; color: #aaaaaa; border-radius: 4px; }
-        .copy-code-btn:hover { background-color: rgba(255,255,255,0.08); color: #ffffff; }
-        .copy-code-btn svg { fill: currentColor; }
-        .ai-message pre { margin: 0; background-color: transparent; padding: 12px; overflow-x: auto; }
-        .ai-message pre code { background-color: transparent; color: #dcdcdc; padding: 0; font-size: 0.85em; display: block; white-space: pre; }
-
-        .ai-message .table-container { width: 100%; overflow-x: auto; margin: 12px 0; border-radius: 8px; border: 1px solid #e1e8ed; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-        .ai-message table { width: 100%; border-collapse: collapse; font-size: 13.5px; background-color: #ffffff; text-align: left; }
-        .ai-message th, .ai-message td { padding: 8px 12px; border: 1px solid #e1e8ed; white-space: nowrap; }
-        .ai-message th { background-color: #f8f9fa; font-weight: 600; color: #14171a; border-bottom: 2px solid #e1e8ed; }
-        .ai-message tr:nth-child(even) { background-color: #f9f9fa; }
+ /* RENDERIZADO DE MARKDOWN EN MODO OSCURO */
+ .ai-message p { margin: 0 0 6px 0; }
+ .ai-message p:last-child { margin-bottom: 0; }
+ .ai-message ul { margin: 4px 0; padding-left: 16px; list-style-type: disc; }
+ .ai-message li { margin-bottom: 2px; }
+ 
+ .ai-message h1, .ai-message h2, .ai-message h3 {
+ margin: 10px 0 4px 0;
+ font-weight: bold;
+ line-height: 1.2;
+ color: #00ffcc; /* Títulos en verde neón ultra-legible */
+ }
+ .ai-message h1 { font-size: 1.2em; border-bottom: 1px solid #333333; padding-bottom: 2px; }
+ .ai-message h2 { font-size: 1.1em; }
+ .ai-message h3 { font-size: 1.05em; }
+ .ai-message code { font-family: monospace; background-color: rgba(255,255,255,0.15); color: #ff5577; padding: 2px 4px; border-radius: 4px; font-size: 0.85em; }
+ .ai-message .chat-link { color: #3b82f6; text-decoration: underline; }
+ .code-block-container { margin: 8px 0; border-radius: 6px; overflow: hidden; border: 1px solid #333333; background-color: #111111; }
+ .code-block-header { background-color: #222222; padding: 6px 10px; display: flex; justify-content: space-between; align-items: center; color: #aaaaaa; font-size: 11px; }
+ .copy-code-btn { background: none; border: none; color: #888888; }
+ .ai-message pre { margin: 0; padding: 8px; overflow-x: auto; }
+ .ai-message pre code { background-color: transparent; color: #eeeeee; padding: 0; font-size: 0.8em; display: block; white-space: pre; }
     </style>
 </head>
 <body>
@@ -201,21 +178,20 @@
     let currentModel = "gemini-2.5-flash";
     let chatHistory = [];
 
-    // CONTROLADOR DINÁMICO DE LA ETIQUETA DE MODELO
-    function updateModelIndicator() {
-        const indicator = document.getElementById("modelIndicator");
-        if (!indicator) return;
-       
-        if (currentModel === "gemini-2.5-flash") {
-            indicator.innerText = "⚡ Gemini 2.5 Flash";
-            indicator.style.backgroundColor = "#dbeafe";
-            indicator.style.color = "#1e40af";
-        } else {
-            indicator.innerText = "🪶 Gemini 2.5 Flash-Lite";
-            indicator.style.backgroundColor = "#e5e7eb";
-            indicator.style.color = "#374151";
-        }
+function updateModelIndicator() {
+    const indicator = document.getElementById("modelIndicator");
+    if (!indicator) return;
+
+    if (currentModel === "gemini-2.5-flash") {
+        indicator.innerText = "⚡ Flash";
+        indicator.style.backgroundColor = "#1e3a8a"; // Azul oscuro
+        indicator.style.color = "#93c5fd";           // Texto azul claro
+    } else {
+        indicator.innerText = "🪶 Lite";
+        indicator.style.backgroundColor = "#2d3748"; // Gris oscuro
+        indicator.style.color = "#e2e8f0";           // Texto gris claro
     }
+}
 
     function copyCode(btn) {
         const container = btn.closest('.code-block-container');
@@ -357,7 +333,7 @@
 
         chatBox.innerHTML += `<div class="message user-message">${userText}</div>`;
         inputField.value = "";
-        chatBox.scrollTop = chatBox.scrollHeight;
+        window.scrollTo(0, document.body.scrollHeight);
 
         chatHistory.push({
             role: "user",
@@ -373,7 +349,7 @@
        
         const loadingId = "loading-" + Date.now();
         chatBox.innerHTML += `<div id="${loadingId}" class="message ai-message" style="color: #8899a6;"><em>Thinking...</em></div>`;
-        chatBox.scrollTop = chatBox.scrollHeight;
+        window.scrollTo(0, document.body.scrollHeight);
 
         try {
             const decryptedApiKey = atob(base64Key);
@@ -431,7 +407,7 @@
             chatHistory.pop();
             chatBox.innerHTML += `<div class="message system-message">Error: Request failed.</div>`;
         }
-        chatBox.scrollTop = chatBox.scrollHeight;
+        window.scrollTo(0, document.body.scrollHeight);
     }
 
     // 🚀 Inicialización del indicador al cargar la app
